@@ -2,120 +2,30 @@
 #include "headers/piece.h"
 #include <iostream>
 
-bool isLowercase(char ch)
+Piece::Piece(Coordinate _pos, bool _isWhite)
 {
-    return ch >= 'a' && ch <= 'z';
+    position = _pos;
+    isColorWhite = _isWhite;
 }
 
-char toLowercase(char ch)
+Piece::~Piece()
 {
-    if (!isLowercase(ch))
-    {
-        return ch + ('a' - 'A');
-    }
-    else
-    {
-        return ch;
-    }
 }
 
-Piece::Piece()
+Coordinate Piece::getPosition()
 {
-    x = 0;
-    y = 0;
-    iswhite = true;
-    type = Rook;
+    return position;
 }
 
-Piece::Piece(int a, int b, char c)
+bool Piece::isWhite()
 {
-    using namespace std;
-    // cout << "Creating piece " << c << " at (" << a << ',' << b << ')' <<endl;
-    x = a;
-    y = b;
-    iswhite = !isLowercase(c); // lowercase represents white pieces
-    switch (toLowercase(c))
-    {
-    case 'p':
-        type = Pawn;
-        break;
-    case 'r':
-        type = Rook;
-        break;
-    case 'n':
-        type = Knight;
-        break;
-    case 'b':
-        type = Bishop;
-        break;
-    case 'q':
-        type = Queen;
-        break;
-    case 'k':
-        type = King;
-        break;
-
-    default:
-        throw; // TODO: Throw proper error
-    }
-
-    // cout << "piece " << getSymbol() << " at (" << a << ',' << b << ')' <<endl;
+    return isColorWhite;
 }
+std::vector<Move> Piece::getValidMoves() { return std::vector<Move>(); }
 
-int Piece::moveTo(int a, int b)
-{
-    x = a;
-    y = b;
-    return 0;
+std::vector<Move> Piece::getAllMoves(){
+    return std::vector<Move>();
 }
-
-int Piece::getValidMoves()
-{
-    return 0;
-}
-
-int Piece::canMoveTo()
-{
-    return 0;
-}
-
-char Piece::getSymbol()
-{
-    char symbol;
-    switch (type)
-    {
-    case Pawn:
-        symbol = 'P';
-        break;
-    case Rook:
-        symbol = 'R';
-        break;
-    case Knight:
-        symbol = 'N';
-        break;
-    case Bishop:
-        symbol = 'B';
-        break;
-    case Queen:
-        symbol = 'Q';
-        break;
-    case King:
-        symbol = 'K';
-        break;
-    default:
-        symbol = 'O';
-        break;
-        // printf("ERROR: %d\n", symbol);
-        // throw; // TODO:
-        // break;
-    }
-
-    if (!iswhite)
-    {
-        return toLowercase(symbol);
-    }
-    else
-    {
-        return symbol;
-    }
+char Piece::getSymbol(){
+    return '*'; // This should never be called. TODO: use throw here
 }

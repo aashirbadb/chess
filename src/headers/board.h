@@ -1,6 +1,8 @@
 #pragma once
-#include "piece.h"
 #include <iostream>
+#include "piece.h"
+#include "pawn.h"
+#include "coordinate.h"
 
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
@@ -15,6 +17,7 @@ public:
     Board();
 
     Board(std::string fen);
+
 
     int fromFEN(std::string fen);
 

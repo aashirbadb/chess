@@ -1,31 +1,25 @@
 #pragma once
-
-enum PieceType
-{
-    Pawn,
-    Rook,
-    Knight,
-    Bishop,
-    Queen,
-    King
-};
+#include <vector>
+#include "coordinate.h"
+#include "move.h"
 
 class Piece
 {
-    int x, y;
-    bool iswhite;
-    PieceType type;
+protected:
+    Coordinate position;
+    bool isColorWhite;
 
 public:
-    Piece();
+    Piece(Coordinate _pos, bool _isWhite);
+    ~Piece();
 
-    Piece(int a, int b, char c);
+    Coordinate getPosition();
+    bool isWhite();
+    std::vector<Move> getValidMoves();
 
-    int moveTo(int a, int b);
+    // Get all moves, including invalid(cannot move due to check, blocking pieces) ones
+    virtual std::vector<Move> getAllMoves();
 
-    int getValidMoves();
-
-    int canMoveTo();
-
-    char getSymbol();
+    // Get the symbol of the piece(to show in the console)
+    virtual char getSymbol();
 };

@@ -1,5 +1,11 @@
 #include "headers/board.h"
 
+// Uppercase represents white pieces
+bool isUppercase(char ch)
+{
+  return (ch >= 'A' && ch <= 'Z');
+}
+
 Board::Board()
 {
   fromFEN(STARTING_FEN);
@@ -10,6 +16,7 @@ Board::Board(std::string fen)
   fromFEN(fen);
 }
 
+// https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
 int Board::fromFEN(std::string fen)
 {
   using namespace std;
@@ -21,9 +28,10 @@ int Board::fromFEN(std::string fen)
 
   for (int i = 0; i < fen.length(); i++)
   {
-    char current_char = fen.at(i);
+    char current_char = fen[i];
     if (piece_placement)
     {
+      // '/' represents a new row
       if (current_char == '/')
       {
         current_x++;
@@ -32,19 +40,57 @@ int Board::fromFEN(std::string fen)
       }
       else if (current_char >= '0' && current_char <= '9')
       {
+        // if there are digits, skip that number of digits
         for (int j = 0; j < current_char - '0'; j++)
         {
-          pieces[current_x][current_y] = NULL;
+          pieces[current_x][current_y] = nullptr;
           current_y++;
         }
       }
-      else if (current_char == ' ')
+      else if (current_char == ' ') // space represents end of piece placement
       {
         piece_placement = false;
       }
-      else
+      else // create proper pieces and place in board
       {
-        pieces[current_x][current_y] = new Piece(current_x, current_y, current_char);
+        // Uppercase pieces are white and lowercase pieces are black
+        switch (current_char)
+        {
+        case 'p':
+        case 'P':
+          pieces[current_x][current_y] = new Pawn({current_x, current_y}, isUppercase(current_char));
+          break;
+
+        case 'r':
+        case 'R':
+          // TODO:Arpit
+          break;
+
+        case 'n':
+        case 'N':
+          // TODO: Arpit
+          break;
+
+        case 'b':
+        case 'B':
+          // TODO: Arpit
+          break;
+
+        case 'q':
+        case 'Q':
+          // TODO: Bhuwan
+          break;
+
+        case 'k':
+        case 'K':
+          // TODO: Bhuwan
+          break;
+
+        default:
+          // TODO: Should never happen. throw error here
+          pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
+          break;
+        }
         current_y++;
       }
     }
@@ -56,7 +102,7 @@ int Board::fromFEN(std::string fen)
 void Board::display()
 {
   using namespace std;
-  cout << "\n\nBoard:\n\n";
+  cout << "\n\nBoard:\n";
 
   for (int i = 0; i < 8; i++)
   {
@@ -68,6 +114,7 @@ void Board::display()
       }
       else
       {
+        // white = <space>, black = #
         cout << (getBoardColorAt(i, j) ? " " : "#");
       }
     }
