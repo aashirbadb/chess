@@ -1,6 +1,6 @@
-#include "headers/queen.h"
+#include "headers/King.h"
 
-Queen::Queen(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
+King::King(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
     if ((_pos.x == 1 && _isColorWhite) || (_pos.x == 6 && !_isColorWhite))
     {
@@ -12,16 +12,16 @@ Queen::Queen(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
     }
 }
 
-Queen::~Queen()
+King::~King()
 {
 }
 
-char Queen::getSymbol()
+char King::getSymbol()
 {
-    return isColorWhite ? 'P' : 'p';
+    return isColorWhite ? 'K' : 'k';
 }
 
-std::vector<Move> Queen::getAllMoves()
+std::vector<Move> King::getAllMoves()
 {
     std::vector<Move> moves;
     int direction = isColorWhite ? 1 : -1;
@@ -31,7 +31,7 @@ std::vector<Move> Queen::getAllMoves()
         Move move = {position, nextPosition};
         moves.push_back(move);
     }
-   //queen cannot move two times so removed
+   //King cannot move two times so removed
    //what about castling
     nextPosition = {position.x + direction, position.y + 1};
     if (nextPosition.isValidPosition())
