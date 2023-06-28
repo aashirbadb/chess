@@ -38,8 +38,8 @@ struct Coordinate
     char *getChessCoordinate()
     {
         char *coord = new char[3];
-        coord[0] = 'h' - x;
-        coord[1] = '1' + y;
+        coord[0] = 'a' + y ;
+        coord[1] = '1' + x;
         coord[2] = '\0';
         return coord;
     }

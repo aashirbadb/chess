@@ -49,7 +49,7 @@ int Board::fromFEN(std::string fen)
     }
     else if (isdigit(current_char))
     {
-      current_y += current_char - '1';
+      current_y += current_char - '0';
     }
     else
     {
@@ -62,36 +62,30 @@ int Board::fromFEN(std::string fen)
 
       case 'r':
       case 'R':
-        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
-        // TODO:Arpit
+        pieces[current_x][current_y] = new Rook({current_x, current_y}, isUppercase(current_char));
         break;
 
       case 'n':
       case 'N':
-        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
-        // TODO: Arpit
+        pieces[current_x][current_y] = new Knight({current_x, current_y}, isUppercase(current_char));
         break;
 
       case 'b':
       case 'B':
-        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
-        // TODO: Arpit
+        pieces[current_x][current_y] = new Bishop({current_x, current_y}, isUppercase(current_char));
         break;
 
       case 'q':
       case 'Q':
-        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
-        // TODO: Bhuwan
+        pieces[current_x][current_y] = new Queen({current_x, current_y}, isUppercase(current_char));
         break;
 
       case 'k':
       case 'K':
         pieces[current_x][current_y] = new King({current_x, current_y}, isUppercase(current_char));
-        // TODO: Bhuwan
         break;
 
       default:
-        // TODO: Should never happen. throw error here
         throw "Invalid piece in FEN";
       }
       current_y++;
@@ -145,10 +139,11 @@ int Board::fromFEN(std::string fen)
   }
   else
   {
-    enPassantTarget = {7 - (fen[index] - 'a'), fen[index + 1] - '1'};
+    enPassantTarget = {fen[index + 1] - '1', fen[index] - 'a'};
     index += 2;
   }
   index++;
+  enPassantTarget.display();
 
   // Halfmove clock
   halfMoveClock = fen[index++] - '0';
@@ -169,7 +164,7 @@ void Board::display()
 
   for (int i = 0; i < 8; i++)
   {
-    cout << (char)('h' - i) << " |";
+    cout << 8-i << " |";
     for (int j = 0; j < 8; j++)
     {
       if (pieces[i][j])
@@ -187,11 +182,13 @@ void Board::display()
   }
 
   cout << "   ";
-  for (int i = 1; i <= 8; i++)
+  for (int i = 0; i < 8; i++)
   {
-    cout << i << ' ';
+        cout << (char)('a'+ i) << " ";
+
   }
-  cout << endl << endl;
+  cout << endl
+       << endl;
 
   cout << left << setw(25) << "Current turn" << (isWhiteTurn ? "White" : "Black") << endl;
   cout << left << setw(25) << "Castling availability";
