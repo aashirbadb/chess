@@ -1,4 +1,5 @@
 #include "headers/board.h"
+#include <iomanip>
 
 // Uppercase represents white pieces
 bool isUppercase(char ch)
@@ -22,79 +23,141 @@ int Board::fromFEN(std::string fen)
   using namespace std;
   cout << "Parsing FEN: " << fen << endl;
 
-  int current_x = 0;
-  int current_y = 0;
-  bool piece_placement = true;
-
-  for (int i = 0; i < fen.length(); i++)
+  // Clear the board
+  for (int i = 0; i < 8; i++)
   {
-    char current_char = fen[i];
-    if (piece_placement)
+    for (int j = 0; j < 8; j++)
     {
-      // '/' represents a new row
-      if (current_char == '/')
-      {
-        current_x++;
-        current_y = 0;
-        continue;
-      }
-      else if (current_char >= '0' && current_char <= '9')
-      {
-        // if there are digits, skip that number of digits
-        for (int j = 0; j < current_char - '0'; j++)
-        {
-          pieces[current_x][current_y] = nullptr;
-          current_y++;
-        }
-      }
-      else if (current_char == ' ') // space represents end of piece placement
-      {
-        piece_placement = false;
-      }
-      else // create proper pieces and place in board
-      {
-        // Uppercase pieces are white and lowercase pieces are black
-        switch (current_char)
-        {
-        case 'p':
-        case 'P':
-          pieces[current_x][current_y] = new Pawn({current_x, current_y}, isUppercase(current_char));
-          break;
-
-        case 'r':
-        case 'R':
-          // TODO:Arpit
-          break;
-
-        case 'n':
-        case 'N':
-          // TODO: Arpit
-          break;
-
-        case 'b':
-        case 'B':
-          // TODO: Arpit
-          break;
-
-        case 'q':
-        case 'Q':
-          // TODO: Bhuwan
-          break;
-
-        case 'k':
-        case 'K':
-          // TODO: Bhuwan
-          break;
-
-        default:
-          // TODO: Should never happen. throw error here
-          pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
-          break;
-        }
-        current_y++;
-      }
+      pieces[i][j] = nullptr;
     }
   }
+
+  int current_x = 0;
+  int current_y = 0;
+  int index = 0;
+
+  // Parse position of pieces
+  while (fen[index] != ' ')
+  {
+    char current_char = fen[index];
+    index++;
+    if (current_char == '/')
+    {
+      current_x++;
+      current_y = 0;
+      continue;
+    }
+    else if (isdigit(current_char))
+    {
+      current_y += current_char - '1';
+    }
+    else
+    {
+      switch (current_char)
+      {
+      case 'p':
+      case 'P':
+        pieces[current_x][current_y] = new Pawn({current_x, current_y}, isUppercase(current_char));
+        break;
+
+      case 'r':
+      case 'R':
+        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
+        // TODO:Arpit
+        break;
+
+      case 'n':
+      case 'N':
+        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
+        // TODO: Arpit
+        break;
+
+      case 'b':
+      case 'B':
+        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
+        // TODO: Arpit
+        break;
+
+      case 'q':
+      case 'Q':
+        pieces[current_x][current_y] = new Piece({current_x, current_y}, isUppercase(current_char));
+        // TODO: Bhuwan
+        break;
+
+      case 'k':
+      case 'K':
+        pieces[current_x][current_y] = new King({current_x, current_y}, isUppercase(current_char));
+        // TODO: Bhuwan
+        break;
+
+      default:
+        // TODO: Should never happen. throw error here
+        throw "Invalid piece in FEN";
+      }
+      current_y++;
+    }
+  }
+  index++; // Skip space
+
+  // Current move
+  isWhiteTurn = (fen[index++] == 'w');
+  index++;
+
+  // Castling availability
+  if (fen[index] == '-')
+  {
+    // All castling things disabled
+    canCastle[0] = false;
+    canCastle[1] = false;
+    canCastle[2] = false;
+    canCastle[3] = false;
+    index++;
+  }
+  else
+  {
+    while (fen[index] != ' ')
+    {
+      switch (fen[index])
+      {
+      case 'K':
+        canCastle[0] = true;
+        break;
+      case 'Q':
+        canCastle[1] = true;
+        break;
+      case 'k':
+        canCastle[2] = true;
+        break;
+      case 'q':
+        canCastle[3] = true;
+        break;
+      }
+      index++;
+    }
+  }
+  index++;
+
+  // En passant target square
+  if (fen[index] == '-')
+  {
+    enPassantTarget = {-1, -1};
+    index++;
+  }
+  else
+  {
+    enPassantTarget = {7 - (fen[index] - 'a'), fen[index + 1] - '1'};
+    index += 2;
+  }
+  index++;
+
+  // Halfmove clock
+  halfMoveClock = fen[index++] - '0';
+  index++;
+
+  // Fullmove clock
+  fullMoveClock = fen[index++] - '0';
+
+  cout << "Successfully parsed FEN" << endl;
 
   return 0;
 }
@@ -106,23 +169,53 @@ void Board::display()
 
   for (int i = 0; i < 8; i++)
   {
+    cout << (char)('h' - i) << " |";
     for (int j = 0; j < 8; j++)
     {
       if (pieces[i][j])
       {
         cout << pieces[i][j]->getSymbol();
+        cout << '|';
       }
       else
       {
         // white = <space>, black = #
-        cout << (getBoardColorAt(i, j) ? " " : "#");
+        cout << (getBoardColorAt(i, j) ? " |" : "#|");
       }
     }
-    cout << "\n";
+    cout << endl;
   }
 
-  cout << flush;
-  // std::flush(std::cout);
+  cout << "   ";
+  for (int i = 1; i <= 8; i++)
+  {
+    cout << i << ' ';
+  }
+  cout << endl << endl;
+
+  cout << left << setw(25) << "Current turn" << (isWhiteTurn ? "White" : "Black") << endl;
+  cout << left << setw(25) << "Castling availability";
+  if (canCastle[0])
+  {
+    cout << "K";
+  }
+  if (canCastle[1])
+  {
+    cout << "Q";
+  }
+  if (canCastle[3])
+  {
+    cout << "k";
+  }
+  if (canCastle[4])
+  {
+    cout << "q";
+  }
+  cout << endl;
+
+  cout << left << setw(25) << "En passant target" << (enPassantTarget.isValidPosition() ? enPassantTarget.getChessCoordinate() : "-") << endl;
+  cout << left << setw(25) << "Halfmove clock" << halfMoveClock << endl;
+  cout << left << setw(25) << "Fullmove clock" << fullMoveClock << endl;
 }
 
 bool Board::getBoardColorAt(int x, int y)

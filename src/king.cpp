@@ -1,15 +1,7 @@
-#include "headers/King.h"
+#include "headers/king.h"
 
 King::King(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
-    if ((_pos.x == 1 && _isColorWhite) || (_pos.x == 6 && !_isColorWhite))
-    {
-        firstMove = true;
-    }//this can be removed or what
-    else
-    {
-        firstMove = false;
-    }
 }
 
 King::~King()

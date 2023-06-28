@@ -2,6 +2,7 @@
 #include <iostream>
 #include "piece.h"
 #include "pawn.h"
+#include "king.h"
 #include "coordinate.h"
 
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
@@ -12,12 +13,18 @@ const std::string SOME_FEN = std::string("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1P
 class Board
 {
     Piece *pieces[8][8];
+    bool isWhiteTurn;
+    bool canCastle[4];
+    Coordinate enPassantTarget;
+    // The number of halfmoves since the last capture or pawn advance, used for the fifty-move rule.
+    int halfMoveClock;
+    // The number of the full moves. It starts at 1 and is incremented after Black's move.
+    int fullMoveClock;
 
 public:
     Board();
 
     Board(std::string fen);
-
 
     int fromFEN(std::string fen);
 

@@ -23,9 +23,11 @@ bool Piece::isWhite()
 }
 std::vector<Move> Piece::getValidMoves() { return std::vector<Move>(); }
 
-std::vector<Move> Piece::getAllMoves(){
+std::vector<Move> Piece::getAllMoves()
+{
     return std::vector<Move>();
 }
-char Piece::getSymbol(){
+char Piece::getSymbol()
+{
     return '*'; // This should never be called. TODO: use throw here
 }

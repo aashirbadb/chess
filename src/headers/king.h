@@ -3,8 +3,6 @@
 
 class King : public Piece
 {
-    bool firstMove; // king cannot move unless there is space and can move anywhere but one step only
-
 public:
     King(Coordinate _pos, bool _isWhite);
     ~King();
