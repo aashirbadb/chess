@@ -1,8 +1,9 @@
 #pragma once
-#include <vector>
-#include "coordinate.h"
 #include "move.h"
+#include "coordinate.h"
+#include <vector>
 
+class Board;
 class Piece
 {
 protected:
@@ -18,8 +19,11 @@ public:
     std::vector<Move> getValidMoves();
 
     // Get all moves, including invalid(cannot move due to check, blocking pieces) ones
-    virtual std::vector<Move> getAllMoves();
+    virtual std::vector<Move> getAllMoves(Board &_board);
 
     // Get the symbol of the piece(to show in the console)
     virtual char getSymbol();
+
+    // returns true if there is opponent piece in given coordinate
+    bool isOpponentPieceAt(Coordinate _coord, Board &_board);
 };

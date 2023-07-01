@@ -13,47 +13,23 @@ char King::getSymbol()
     return isColorWhite ? 'K' : 'k';
 }
 
-std::vector<Move> King::getAllMoves()
+const Coordinate KING_MOVE_DIRECTIONS[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
+std::vector<Move> King::getAllMoves(Board &_board)
 {
     std::vector<Move> moves;
-    int direction = isColorWhite ? 1 : -1;
-    Coordinate nextPosition = {position.x + direction, position.y};
-    if (nextPosition.isValidPosition())
+
+    for (int i = 0; i < 8; i++)
     {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
+        Coordinate next_position = {position.x + KING_MOVE_DIRECTIONS[i].x, position.y + KING_MOVE_DIRECTIONS[i].y};
+        if (next_position.isValidPosition())
+        {
+            if (_board.getPieceAt(next_position) == nullptr || isOpponentPieceAt(next_position, _board))
+            {
+                moves.push_back(Move{.start = position, .end = next_position});
+            }
+        }
     }
-   //King cannot move two times so removed
-   //what about castling
-    nextPosition = {position.x + direction, position.y + 1};
-    if (nextPosition.isValidPosition())
-    {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
-    }
-    nextPosition = {position.x + direction, position.y - 1};
-    if (nextPosition.isValidPosition())
-    {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
-    }
-    nextPosition = {position.x - direction, position.y + 1};// movement in backwards??
-    if (nextPosition.isValidPosition())
-    {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
-    }
-    nextPosition = {position.x , position.y + 1};// movement in one side??
-    if (nextPosition.isValidPosition())
-    {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
-    }
-    nextPosition = {position.x , position.y - 1};// movement in other side??
-    if (nextPosition.isValidPosition())
-    {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
-    }
+
     return moves;
 }

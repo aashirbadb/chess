@@ -226,3 +226,7 @@ bool Board::getBoardColorAt(int x, int y)
     return y % 2;
   }
 }
+
+Piece* Board::getPieceAt(Coordinate _coord){
+  return pieces[_coord.x][_coord.y];
+}

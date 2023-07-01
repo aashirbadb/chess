@@ -1,5 +1,6 @@
 #pragma once
 #include "piece.h"
+#include "board.h"
 
 class Pawn : public Piece
 {
@@ -8,6 +9,6 @@ class Pawn : public Piece
 public:
     Pawn(Coordinate _pos, bool _isWhite);
     ~Pawn();
-    std::vector<Move> getAllMoves() override;
+    std::vector<Move> getAllMoves(Board &_board) override;
     char getSymbol() override;
 };

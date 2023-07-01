@@ -13,7 +13,8 @@ struct Coordinate
         }
         else
         {
-            std::cout << "Not a valid position" << std::endl;
+            std::cout << "Not a valid position"
+                      << "(" << x << ", " << y << ")" << std::endl;
         }
     }
 
@@ -26,7 +27,8 @@ struct Coordinate
         }
         else
         {
-            std::cout << "Not a valid position" << std::endl;
+            std::cout << "Not a valid position"
+                      << "(" << x << ", " << y << ")" << std::endl;
         }
     }
 
@@ -38,8 +40,8 @@ struct Coordinate
     char *getChessCoordinate()
     {
         char *coord = new char[3];
-        coord[0] = 'a' + y ;
-        coord[1] = '1' + x;
+        coord[0] = 'a' + y;
+        coord[1] = '1' + 7 - x;
         coord[2] = '\0';
         return coord;
     }

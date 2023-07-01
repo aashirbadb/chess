@@ -2,7 +2,7 @@
 
 Pawn::Pawn(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
-    if ((_pos.x == 1 && _isColorWhite) || (_pos.x == 6 && !_isColorWhite))
+    if ((_pos.x == 6 && _isColorWhite) || (_pos.x == 1 && !_isColorWhite))
     {
         firstMove = true;
     }
@@ -21,36 +21,40 @@ char Pawn::getSymbol()
     return isColorWhite ? 'P' : 'p';
 }
 
-std::vector<Move> Pawn::getAllMoves()
+std::vector<Move> Pawn::getAllMoves(Board &_board)
 {
     std::vector<Move> moves;
-    int direction = isColorWhite ? 1 : -1;
-    Coordinate nextPosition = {position.x + direction, position.y};
-    if (nextPosition.isValidPosition())
+    int direction = isColorWhite ? -1 : 1;
+    Coordinate oneahead = {position.x + direction, position.y};
+    Coordinate twoahead = {position.x + direction * 2, position.y};
+    bool oneaheadallowed = false;
+
+    if (oneahead.isValidPosition() && _board.getPieceAt(oneahead) == nullptr)
     {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
+        moves.push_back({position, oneahead});
+        oneaheadallowed = true;
     }
-    if (firstMove)
+
+    if (firstMove && oneaheadallowed && twoahead.isValidPosition() && _board.getPieceAt(twoahead) == nullptr)
     {
-        nextPosition = {position.x + 2 * direction, position.y};
-        if (nextPosition.isValidPosition())
-        {
-            Move move = {position, nextPosition};
-            moves.push_back(move);
-        }
+        moves.push_back({position, twoahead});
     }
-    nextPosition = {position.x + direction, position.y + 1};
-    if (nextPosition.isValidPosition())
+
+    Coordinate nextMove = {position.x + direction, position.y + 1};
+    nextMove.displayChessCoordinate();
+    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
+        moves.push_back({position, nextMove});
     }
-    nextPosition = {position.x + direction, position.y - 1};
-    if (nextPosition.isValidPosition())
+
+    nextMove = {position.x + direction, position.y - 1};
+    nextMove.displayChessCoordinate();
+    std::cout << isOpponentPieceAt(nextMove, _board) << std::endl;
+    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
-        Move move = {position, nextPosition};
-        moves.push_back(move);
+        moves.push_back({position, nextMove});
     }
+
+    using namespace std;
     return moves;
 }
