@@ -41,15 +41,12 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     }
 
     Coordinate nextMove = {position.x + direction, position.y + 1};
-    nextMove.displayChessCoordinate();
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
         moves.push_back({position, nextMove});
     }
 
     nextMove = {position.x + direction, position.y - 1};
-    nextMove.displayChessCoordinate();
-    std::cout << isOpponentPieceAt(nextMove, _board) << std::endl;
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
         moves.push_back({position, nextMove});
