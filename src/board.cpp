@@ -17,6 +17,32 @@ Board::Board(std::string fen)
   fromFEN(fen);
 }
 
+Board::Board(Board &_board)
+{
+  // TODO: Use copy constructor for pieces also
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      pieces[i][j] = _board.pieces[i][j];
+    }
+  }
+
+  for (int i = 0; i < 4; i++)
+  {
+    canCastle[i] = _board.canCastle[i];
+  }
+
+  isWhiteTurn = _board.isWhiteTurn;
+  enPassantTarget = _board.enPassantTarget;
+  halfMoveClock = _board.halfMoveClock;
+  fullMoveClock = _board.fullMoveClock;
+}
+
+Board::~Board()
+{
+}
+
 // https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
 int Board::fromFEN(std::string fen)
 {
@@ -143,7 +169,6 @@ int Board::fromFEN(std::string fen)
     index += 2;
   }
   index++;
-  enPassantTarget.display();
 
   // Halfmove clock
   halfMoveClock = fen[index++] - '0';
@@ -160,11 +185,10 @@ int Board::fromFEN(std::string fen)
 void Board::display()
 {
   using namespace std;
-  cout << "\n\nBoard:\n";
 
   for (int i = 0; i < 8; i++)
   {
-    cout << 8-i << " |";
+    cout << 8 - i << " |";
     for (int j = 0; j < 8; j++)
     {
       if (pieces[i][j])
@@ -184,8 +208,7 @@ void Board::display()
   cout << "   ";
   for (int i = 0; i < 8; i++)
   {
-        cout << (char)('a'+ i) << " ";
-
+    cout << (char)('a' + i) << " ";
   }
   cout << endl
        << endl;
@@ -227,6 +250,161 @@ bool Board::getBoardColorAt(int x, int y)
   }
 }
 
-Piece* Board::getPieceAt(Coordinate _coord){
+Piece *Board::getPieceAt(Coordinate _coord)
+{
   return pieces[_coord.x][_coord.y];
+}
+
+bool Board::isWhiteInCheck()
+{
+  Piece *whiteKing = nullptr;
+  std::vector<Piece *> blackPieces;
+  bool whiteInCheck = false;
+  bool blackInCheck = false;
+
+  // Search for white king
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      Piece *currentPiece = pieces[i][j];
+      if (currentPiece == nullptr)
+        continue;
+      if (currentPiece->getSymbol() == 'K')
+      {
+        whiteKing = pieces[i][j];
+      }
+
+      if (islower(currentPiece->getSymbol()))
+      {
+        blackPieces.push_back(currentPiece);
+      }
+    }
+  }
+
+  for (int i = 0; i < blackPieces.size(); i++)
+  {
+    std::vector<Move> moves = blackPieces[i]->getAllMoves(*this);
+    for (int j = 0; j < moves.size(); j++)
+    {
+      if (moves[j].end.x == whiteKing->getPosition().x && moves[j].end.y == whiteKing->getPosition().y)
+      {
+        whiteInCheck = true;
+        break;
+      }
+    }
+  }
+
+  return whiteInCheck;
+}
+
+bool Board::isBlackInCheck()
+{
+  using namespace std; // TODO:
+
+  Piece *blackKing = nullptr;
+  std::vector<Piece *> whitePieces;
+  bool blackInCheck = false;
+
+  // Search for black king and white pieces
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      Piece *currentPiece = pieces[i][j];
+      if (currentPiece == nullptr)
+        continue;
+
+      if (currentPiece->getSymbol() == 'k')
+      {
+        blackKing = pieces[i][j];
+      }
+
+      // Other pieces
+      if (isupper(currentPiece->getSymbol()))
+      {
+        whitePieces.push_back(currentPiece);
+      }
+    }
+  }
+
+  for (int i = 0; i < whitePieces.size(); i++)
+  {
+    std::vector<Move> moves = whitePieces[i]->getAllMoves(*this);
+    for (int j = 0; j < moves.size(); j++)
+    {
+      if (moves[j].end.x == blackKing->getPosition().x && moves[j].end.y == blackKing->getPosition().y)
+      {
+        blackInCheck = true;
+        break;
+      }
+    }
+  }
+
+  return blackInCheck;
+}
+
+void Board::moveUnchecked(Move _move)
+{
+  Piece *startPiece = pieces[_move.start.x][_move.start.y];
+  Piece *endPiece = pieces[_move.end.x][_move.end.y];
+
+  if (startPiece == nullptr)
+  {
+    throw "There is no piece to move";
+  }
+
+  if (endPiece == nullptr)
+  {
+    // Move directly
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+  else if (startPiece->isOpponentPieceAt(_move.end, *this))
+  {
+    // Take piece and move
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+  else if (startPiece->isOwnPieceAt(_move.end, *this))
+  {
+    // Capturing own piece
+    std::cerr << "Warning: Capturing own piece: ";
+    _move.display();
+    std::cout << std::endl;
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+}
+
+bool Board::isOpponentInCheck()
+{
+  if (isWhiteTurn)
+  {
+    return isBlackInCheck();
+  }
+  else
+  {
+    return isWhiteInCheck();
+  }
+}
+
+bool Board::isPlayerInCheck()
+{
+  if (isWhiteTurn)
+  {
+    return isWhiteInCheck();
+  }
+  else
+  {
+    return isBlackInCheck();
+  }
+}
+
+bool Board::getIsWhiteTurn()
+{
+  return isWhiteTurn;
 }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "headers/board.h"
 #include <vector>
+#include "headers/test.h"
 
 void show_valid_positions_at(Coordinate coord, Board &board)
 {
@@ -29,18 +30,31 @@ void show_valid_positions_at(Coordinate coord, Board &board)
 
 int main()
 {
-    Board board = Board(SOME_FEN);
+    char fen[] = "rnbqkbnr/ppp1pppp/8/1B1p4/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2";
+    using namespace std;
+    Board board = Board(string(fen));
     board.display();
 
-    // for (int i = 0; i < 8; i++)
-    // {
-    //     for (int j = 0; j < 8; j++)
-    //     {
-    //         show_valid_positions_at({i, j},board);
-    //     }
-    // }
-
-    show_valid_positions_at({4, 4}, board);
+    Piece *piece = board.getPieceAt({0, 2});
+    cout << "Checking at: " << piece->getPosition().getChessCoordinate() << endl;
+    if (piece == nullptr)
+    {
+        throw "Null";
+    }
+    std::vector<Move> legal = piece->getLegalMoves(board);
+    if (legal.size() == 0)
+    {
+        cout << "No legal moves found for this position" << endl;
+    }
+    else
+    {
+        cout << "Legal moves for " << (board.getIsWhiteTurn() ? "white" : "black") << ": ";
+        for (int i = 0; i < legal.size(); i++)
+        {
+            legal[i].display();
+            cout << endl;
+        }
+    }
 
     return 0;
 }

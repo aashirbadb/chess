@@ -45,3 +45,42 @@ bool Piece::isOpponentPieceAt(Coordinate _coord, Board &_board)
         return _board.getPieceAt(_coord)->isWhite() == !isColorWhite;
     }
 }
+
+bool Piece::isOwnPieceAt(Coordinate _coord, Board &_board)
+{
+    Piece *_piece = _board.getPieceAt(_coord);
+    std::cout << _piece->getSymbol() << std::endl;
+    if (_piece == nullptr)
+    {
+        return false;
+    }
+    else
+    {
+        return _board.getPieceAt(_coord)->isWhite() == isColorWhite;
+    }
+}
+
+std::vector<Move> Piece::getLegalMoves(Board &_board)
+{
+    std::vector<Move> allMoves = getAllMoves(_board);
+    std::vector<Move> legalMoves;
+
+    Board nextMoveBoardPosition;
+    for (int i = 0; i < allMoves.size(); i++)
+    {
+        nextMoveBoardPosition = Board(_board);
+        nextMoveBoardPosition.moveUnchecked(allMoves[i]);
+
+        if (!nextMoveBoardPosition.isPlayerInCheck())
+        {
+            legalMoves.push_back(allMoves[i]);
+        }
+    }
+
+    return legalMoves;
+}
+
+void Piece::updateCoordinate(Coordinate _new_pos)
+{
+    position = _new_pos;
+}

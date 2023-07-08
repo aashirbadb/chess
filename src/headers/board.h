@@ -29,8 +29,10 @@ class Board
 
 public:
     Board();
+    ~Board();
 
     Board(std::string fen);
+    Board(Board &_board);
 
     int fromFEN(std::string fen);
 
@@ -38,5 +40,14 @@ public:
 
     bool getBoardColorAt(int _x, int _y);
 
+    bool getIsWhiteTurn();
+
+    bool isWhiteInCheck();
+    bool isBlackInCheck();
+    bool isOpponentInCheck();
+    bool isPlayerInCheck();
+
     Piece *getPieceAt(Coordinate _coord);
+
+    void moveUnchecked(Move _move);
 };
