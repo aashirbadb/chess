@@ -48,6 +48,10 @@ public:
     bool isPlayerInCheck();
 
     Piece *getPieceAt(Coordinate _coord);
+    void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);
+    void perfomMove(Move _move);
 };
+
+Piece*createPiece(Coordinate _coord, char type);

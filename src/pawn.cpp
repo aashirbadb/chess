@@ -31,27 +31,28 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
 
     if (oneahead.isValidPosition() && _board.getPieceAt(oneahead) == nullptr)
     {
-        moves.push_back({position, oneahead});
+        moves.push_back({position, oneahead, moveType::Normal});
         oneaheadallowed = true;
     }
 
     if (firstMove && oneaheadallowed && twoahead.isValidPosition() && _board.getPieceAt(twoahead) == nullptr)
     {
-        moves.push_back({position, twoahead});
+        moves.push_back({position, twoahead, moveType::PawnFirstMove});
     }
 
     Coordinate nextMove = {position.x + direction, position.y + 1};
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
-        moves.push_back({position, nextMove});
+        moves.push_back({position, nextMove, moveType::Enpassant});
+        _board.setEnpassantTarget(oneahead);
     }
 
     nextMove = {position.x + direction, position.y - 1};
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
-        moves.push_back({position, nextMove});
+        moves.push_back({position, nextMove, moveType::Enpassant});
+        _board.setEnpassantTarget(oneahead);
     }
 
-    using namespace std;
     return moves;
 }

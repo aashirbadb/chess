@@ -1,11 +1,8 @@
 #include "headers/board.h"
 #include <iomanip>
 
-// Uppercase represents white pieces
-bool isUppercase(char ch)
-{
-  return (ch >= 'A' && ch <= 'Z');
-}
+// TODO: Add gamestate variable that stores gamestate(Playing, Check, CheckMate, Stalemate, Draw)
+// TODO: Check for checkmates and stalemates
 
 Board::Board()
 {
@@ -17,26 +14,31 @@ Board::Board(std::string fen)
   fromFEN(fen);
 }
 
-Board::Board(Board &_board)
+Board::Board(Board &src)
 {
-  // TODO: Use copy constructor for pieces also
   for (int i = 0; i < 8; i++)
   {
     for (int j = 0; j < 8; j++)
     {
-      pieces[i][j] = _board.pieces[i][j];
+      if (src.pieces[i][j] == nullptr)
+      {
+        pieces[i][j] = nullptr;
+      }
+      else
+      {
+        pieces[i][j] = createPiece(src.pieces[i][j]->getPosition(), src.pieces[i][j]->getSymbol());
+      }
     }
   }
 
+  isWhiteTurn = src.isWhiteTurn;
   for (int i = 0; i < 4; i++)
   {
-    canCastle[i] = _board.canCastle[i];
+    canCastle[i] = src.canCastle[i];
   }
-
-  isWhiteTurn = _board.isWhiteTurn;
-  enPassantTarget = _board.enPassantTarget;
-  halfMoveClock = _board.halfMoveClock;
-  fullMoveClock = _board.fullMoveClock;
+  enPassantTarget = src.enPassantTarget;
+  halfMoveClock = src.halfMoveClock;
+  fullMoveClock = src.fullMoveClock;
 }
 
 Board::~Board()
@@ -79,41 +81,7 @@ int Board::fromFEN(std::string fen)
     }
     else
     {
-      switch (current_char)
-      {
-      case 'p':
-      case 'P':
-        pieces[current_x][current_y] = new Pawn({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      case 'r':
-      case 'R':
-        pieces[current_x][current_y] = new Rook({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      case 'n':
-      case 'N':
-        pieces[current_x][current_y] = new Knight({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      case 'b':
-      case 'B':
-        pieces[current_x][current_y] = new Bishop({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      case 'q':
-      case 'Q':
-        pieces[current_x][current_y] = new Queen({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      case 'k':
-      case 'K':
-        pieces[current_x][current_y] = new King({current_x, current_y}, isUppercase(current_char));
-        break;
-
-      default:
-        throw "Invalid piece in FEN";
-      }
+      pieces[current_x][current_y] = createPiece({current_x, current_y}, current_char);
       current_y++;
     }
   }
@@ -236,6 +204,14 @@ void Board::display()
   cout << left << setw(25) << "En passant target" << (enPassantTarget.isValidPosition() ? enPassantTarget.getChessCoordinate() : "-") << endl;
   cout << left << setw(25) << "Halfmove clock" << halfMoveClock << endl;
   cout << left << setw(25) << "Fullmove clock" << fullMoveClock << endl;
+  if (isWhiteInCheck())
+  {
+    cout << "White is in check" << endl;
+  }
+  else if (isBlackInCheck())
+  {
+    cout << "Black is in check" << endl;
+  }
 }
 
 bool Board::getBoardColorAt(int x, int y)
@@ -284,6 +260,8 @@ bool Board::isWhiteInCheck()
 
   for (int i = 0; i < blackPieces.size(); i++)
   {
+    if (whiteInCheck)
+      break;
     std::vector<Move> moves = blackPieces[i]->getAllMoves(*this);
     for (int j = 0; j < moves.size(); j++)
     {
@@ -300,8 +278,6 @@ bool Board::isWhiteInCheck()
 
 bool Board::isBlackInCheck()
 {
-  using namespace std; // TODO:
-
   Piece *blackKing = nullptr;
   std::vector<Piece *> whitePieces;
   bool blackInCheck = false;
@@ -309,6 +285,8 @@ bool Board::isBlackInCheck()
   // Search for black king and white pieces
   for (int i = 0; i < 8; i++)
   {
+    if (blackInCheck)
+      break;
     for (int j = 0; j < 8; j++)
     {
       Piece *currentPiece = pieces[i][j];
@@ -344,42 +322,6 @@ bool Board::isBlackInCheck()
   return blackInCheck;
 }
 
-void Board::moveUnchecked(Move _move)
-{
-  Piece *startPiece = pieces[_move.start.x][_move.start.y];
-  Piece *endPiece = pieces[_move.end.x][_move.end.y];
-
-  if (startPiece == nullptr)
-  {
-    throw "There is no piece to move";
-  }
-
-  if (endPiece == nullptr)
-  {
-    // Move directly
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
-  else if (startPiece->isOpponentPieceAt(_move.end, *this))
-  {
-    // Take piece and move
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
-  else if (startPiece->isOwnPieceAt(_move.end, *this))
-  {
-    // Capturing own piece
-    std::cerr << "Warning: Capturing own piece: ";
-    _move.display();
-    std::cout << std::endl;
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
-}
-
 bool Board::isOpponentInCheck()
 {
   if (isWhiteTurn)
@@ -407,4 +349,149 @@ bool Board::isPlayerInCheck()
 bool Board::getIsWhiteTurn()
 {
   return isWhiteTurn;
+}
+
+void Board::setEnpassantTarget(Coordinate _coord)
+{
+  enPassantTarget = _coord;
+}
+
+void Board::moveUnchecked(Move _move)
+{
+  Piece *startPiece = getPieceAt(_move.start);
+  Piece *endPiece = getPieceAt(_move.end);
+
+  if (startPiece == nullptr)
+  {
+    std::cout << "There is no piece to move" << std::endl;
+    throw "There is no piece to move";
+  }
+
+  if (endPiece == nullptr)
+  {
+    // Move directly
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+  else if (startPiece->isOpponentPieceAt(_move.end, *this))
+  {
+    // Take piece and move
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+  else if (startPiece->isOwnPieceAt(_move.end, *this))
+  {
+    // Capturing own piece
+    std::cerr << "Warning: Capturing own piece: " << _move << std::endl;
+    pieces[_move.start.x][_move.start.y] = nullptr;
+    pieces[_move.end.x][_move.end.y] = startPiece;
+    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  }
+}
+
+void Board::perfomMove(Move _move)
+{
+  Piece *startPiece = getPieceAt(_move.start);
+  Piece *endPiece = getPieceAt(_move.end);
+
+  if (startPiece == nullptr)
+    return;
+
+  bool isCorrectTurn = isWhiteTurn == startPiece->isWhite();
+  if (!isCorrectTurn)
+  {
+    std::cerr << "It is not your turn" << std::endl;
+    return;
+  }
+
+  std::vector<Move> moves = startPiece->getLegalMoves(*this);
+  bool isValidMove = false;
+
+  // Check if the move is valid
+  for (int i = 0; i < moves.size(); i++)
+  {
+    if (_move.end.x == moves[i].end.x && _move.end.y == moves[i].end.y)
+    {
+      isValidMove = true;
+      _move = moves[i]; // _moves may not provide moveType so use moves[i]
+      break;
+    }
+  }
+
+  if (isValidMove)
+  {
+    if (_move.type == moveType::KingsideCastle || _move.type == moveType::QueensideCastle)
+    {
+      // TODO: handle castling
+    }
+    else
+    {
+      pieces[_move.start.x][_move.start.y] = nullptr;
+      pieces[_move.end.x][_move.end.y] = startPiece;
+      pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+    }
+
+    // Increment fullMoveClock on black turn
+    if (!isWhiteTurn)
+    {
+      fullMoveClock++;
+    }
+
+    isWhiteTurn = !isWhiteTurn;
+    enPassantTarget = {-1, -1}; // reset enpassant target every turn
+
+    // Halfmove clock increments every piece but resets when there is pawn movement or capture
+    if (startPiece->getSymbol() == 'p' || startPiece->getSymbol() == 'P' || _move.type == moveType::Capture)
+    {
+      halfMoveClock = 0;
+    }
+    else
+    {
+      halfMoveClock++;
+    }
+  }
+  else
+  {
+    std::cerr << "Trying to perform an invalid move: " << _move << std::endl;
+  }
+}
+
+// Helper function to create a piece at given coordinate
+Piece *createPiece(Coordinate _pos, char piece)
+{
+  switch (piece)
+  {
+  case 'p':
+  case 'P':
+    return new Pawn({_pos.x, _pos.y}, isupper(piece));
+
+  case 'r':
+  case 'R':
+    return new Rook({_pos.x, _pos.y}, isupper(piece));
+
+  case 'n':
+  case 'N':
+    return new Knight({_pos.x, _pos.y}, isupper(piece));
+
+  case 'b':
+  case 'B':
+    return new Bishop({_pos.x, _pos.y}, isupper(piece));
+
+  case 'q':
+  case 'Q':
+    return new Queen({_pos.x, _pos.y}, isupper(piece));
+
+  case 'k':
+  case 'K':
+    return new King({_pos.x, _pos.y}, isupper(piece));
+
+  default:
+    std::cerr << "Invalid piece" << std::endl;
+    throw "Invalid piece";
+  }
+
+  std::cerr << "Unreachable" << std::endl;
+  throw "Unreachable";
 }

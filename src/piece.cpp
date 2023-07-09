@@ -49,7 +49,6 @@ bool Piece::isOpponentPieceAt(Coordinate _coord, Board &_board)
 bool Piece::isOwnPieceAt(Coordinate _coord, Board &_board)
 {
     Piece *_piece = _board.getPieceAt(_coord);
-    std::cout << _piece->getSymbol() << std::endl;
     if (_piece == nullptr)
     {
         return false;
@@ -65,10 +64,9 @@ std::vector<Move> Piece::getLegalMoves(Board &_board)
     std::vector<Move> allMoves = getAllMoves(_board);
     std::vector<Move> legalMoves;
 
-    Board nextMoveBoardPosition;
     for (int i = 0; i < allMoves.size(); i++)
     {
-        nextMoveBoardPosition = Board(_board);
+        Board nextMoveBoardPosition(_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
 
         if (!nextMoveBoardPosition.isPlayerInCheck())

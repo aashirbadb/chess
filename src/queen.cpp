@@ -23,17 +23,15 @@ std::vector<Move> Queen::getAllMoves(Board &_board)
         Coordinate next_position = {direction.x + position.x, direction.y + position.y};
         while (next_position.isValidPosition())
         {
-            if (_board.getPieceAt(next_position) != nullptr)
+            if (isOpponentPieceAt(next_position, _board))
             {
-                if (isOpponentPieceAt(next_position, _board))
-                {
-
-                    moves.push_back(Move{.start = position, .end = next_position});
-                }
+                moves.push_back(Move{.start = position, .end = next_position, moveType::Capture});
                 break;
             }
-
-            moves.push_back(Move{.start = position, .end = next_position});
+            else if (_board.getPieceAt(next_position) == nullptr)
+            {
+                moves.push_back(Move{.start = position, .end = next_position, moveType::Normal});
+            }
 
             next_position = {next_position.x + direction.x,
                              next_position.y + direction.y};

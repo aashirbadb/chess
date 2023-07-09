@@ -46,3 +46,19 @@ struct Coordinate
         return coord;
     }
 };
+
+inline std::ostream &operator<<(std::ostream &o, Coordinate &c)
+{
+    if (c.isValidPosition())
+    {
+
+        o << c.getChessCoordinate();
+    }
+    else
+    {
+        o << "Not a valid position"
+          << "(" << c.x << ", " << c.y << ")";
+    }
+
+    return o;
+}

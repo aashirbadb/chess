@@ -16,8 +16,7 @@ void show_valid_positions_at(Coordinate coord, Board &board)
         std::cout << "Showing all valid moves for " << piece->getSymbol() << " at " << piece->getPosition().getChessCoordinate() << std::endl;
         for (int i = 0; i < valid.size(); i++)
         {
-            valid[i].display();
-            std::cout << '\t';
+            std::cout << valid[i] << '\t';
         }
         std::cout << '\n';
     }
@@ -36,11 +35,12 @@ int main()
     board.display();
 
     Piece *piece = board.getPieceAt({0, 2});
-    cout << "Checking at: " << piece->getPosition().getChessCoordinate() << endl;
     if (piece == nullptr)
     {
+        cout << "null" << endl;
         throw "Null";
     }
+
     std::vector<Move> legal = piece->getLegalMoves(board);
     if (legal.size() == 0)
     {
@@ -51,10 +51,11 @@ int main()
         cout << "Legal moves for " << (board.getIsWhiteTurn() ? "white" : "black") << ": ";
         for (int i = 0; i < legal.size(); i++)
         {
-            legal[i].display();
-            cout << endl;
+            cout << legal[i] << endl;
         }
     }
 
+    board.perfomMove({{0, 2}, {1, 3}, moveType::Capture});
+    board.perfomMove({{1, 2}, {2, 2}, moveType::Normal});
     return 0;
 }
