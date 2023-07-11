@@ -91,38 +91,34 @@ int Board::fromFEN(std::string fen)
   isWhiteTurn = (fen[index++] == 'w');
   index++;
 
-  // Castling availability
-  if (fen[index] == '-')
+  // Castling
+  canCastle[0] = false;
+  canCastle[1] = false;
+  canCastle[2] = false;
+  canCastle[3] = false;
+
+  // If there is '-' then no castling is available
+  // If there is ' ' then some castling was found and set
+  while (fen[index] != ' ' && fen[index] != '-')
   {
-    // All castling things disabled
-    canCastle[0] = false;
-    canCastle[1] = false;
-    canCastle[2] = false;
-    canCastle[3] = false;
+    switch (fen[index])
+    {
+    case 'K':
+      canCastle[0] = true;
+      break;
+    case 'Q':
+      canCastle[1] = true;
+      break;
+    case 'k':
+      canCastle[2] = true;
+      break;
+    case 'q':
+      canCastle[3] = true;
+      break;
+    }
     index++;
   }
-  else
-  {
-    while (fen[index] != ' ')
-    {
-      switch (fen[index])
-      {
-      case 'K':
-        canCastle[0] = true;
-        break;
-      case 'Q':
-        canCastle[1] = true;
-        break;
-      case 'k':
-        canCastle[2] = true;
-        break;
-      case 'q':
-        canCastle[3] = true;
-        break;
-      }
-      index++;
-    }
-  }
+
   index++;
 
   // En passant target square
@@ -178,9 +174,12 @@ void Board::display()
   {
     cout << (char)('a' + i) << " ";
   }
-  cout << endl
-       << endl;
+  cout << endl;
+}
 
+void Board::display_meta()
+{
+  using namespace std;
   cout << left << setw(25) << "Current turn" << (isWhiteTurn ? "White" : "Black") << endl;
   cout << left << setw(25) << "Castling availability";
   if (canCastle[0])
@@ -233,29 +232,13 @@ Piece *Board::getPieceAt(Coordinate _coord)
 
 bool Board::isWhiteInCheck()
 {
-  Piece *whiteKing = nullptr;
-  std::vector<Piece *> blackPieces;
   bool whiteInCheck = false;
   bool blackInCheck = false;
 
-  // Search for white king
-  for (int i = 0; i < 8; i++)
+  if (whiteKing == nullptr)
   {
-    for (int j = 0; j < 8; j++)
-    {
-      Piece *currentPiece = pieces[i][j];
-      if (currentPiece == nullptr)
-        continue;
-      if (currentPiece->getSymbol() == 'K')
-      {
-        whiteKing = pieces[i][j];
-      }
-
-      if (islower(currentPiece->getSymbol()))
-      {
-        blackPieces.push_back(currentPiece);
-      }
-    }
+    std::cerr << "Cannot find white king" << std::endl;
+    throw "Cannot find white king";
   }
 
   for (int i = 0; i < blackPieces.size(); i++)
@@ -267,6 +250,7 @@ bool Board::isWhiteInCheck()
     {
       if (moves[j].end.x == whiteKing->getPosition().x && moves[j].end.y == whiteKing->getPosition().y)
       {
+        std::cout << "Here" << std::endl;
         whiteInCheck = true;
         break;
       }
@@ -278,37 +262,19 @@ bool Board::isWhiteInCheck()
 
 bool Board::isBlackInCheck()
 {
-  Piece *blackKing = nullptr;
-  std::vector<Piece *> whitePieces;
   bool blackInCheck = false;
 
-  // Search for black king and white pieces
-  for (int i = 0; i < 8; i++)
+  if (blackKing == nullptr)
   {
-    if (blackInCheck)
-      break;
-    for (int j = 0; j < 8; j++)
-    {
-      Piece *currentPiece = pieces[i][j];
-      if (currentPiece == nullptr)
-        continue;
-
-      if (currentPiece->getSymbol() == 'k')
-      {
-        blackKing = pieces[i][j];
-      }
-
-      // Other pieces
-      if (isupper(currentPiece->getSymbol()))
-      {
-        whitePieces.push_back(currentPiece);
-      }
-    }
+    std::cerr << "Cannot find black king" << std::endl;
+    throw "Cannot find black king";
   }
 
   for (int i = 0; i < whitePieces.size(); i++)
   {
     std::vector<Move> moves = whitePieces[i]->getAllMoves(*this);
+    if (blackInCheck)
+      break;
     for (int j = 0; j < moves.size(); j++)
     {
       if (moves[j].end.x == blackKing->getPosition().x && moves[j].end.y == blackKing->getPosition().y)
@@ -367,37 +333,23 @@ void Board::moveUnchecked(Move _move)
     throw "There is no piece to move";
   }
 
-  if (endPiece == nullptr)
-  {
-    // Move directly
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
-  else if (startPiece->isOpponentPieceAt(_move.end, *this))
-  {
-    // Take piece and move
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
-  else if (startPiece->isOwnPieceAt(_move.end, *this))
-  {
-    // Capturing own piece
-    std::cerr << "Warning: Capturing own piece: " << _move << std::endl;
-    pieces[_move.start.x][_move.start.y] = nullptr;
-    pieces[_move.end.x][_move.end.y] = startPiece;
-    pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
-  }
+  // Move directly
+  pieces[_move.start.x][_move.start.y] = nullptr;
+  pieces[_move.end.x][_move.end.y] = startPiece;
+  pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
 }
 
 void Board::perfomMove(Move _move)
 {
+  std::cout << _move << std::endl;
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
 
   if (startPiece == nullptr)
+  {
+    std::cerr << "No piece to move" << std::endl;
     return;
+  }
 
   bool isCorrectTurn = isWhiteTurn == startPiece->isWhite();
   if (!isCorrectTurn)
@@ -459,39 +411,82 @@ void Board::perfomMove(Move _move)
 }
 
 // Helper function to create a piece at given coordinate
-Piece *createPiece(Coordinate _pos, char piece)
+Piece *Board::createPiece(Coordinate _pos, char piece)
 {
+  Piece *piece_ptr;
   switch (piece)
   {
   case 'p':
   case 'P':
-    return new Pawn({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Pawn({_pos.x, _pos.y}, isupper(piece));
+    break;
 
   case 'r':
   case 'R':
-    return new Rook({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Rook({_pos.x, _pos.y}, isupper(piece));
+    break;
 
   case 'n':
   case 'N':
-    return new Knight({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Knight({_pos.x, _pos.y}, isupper(piece));
+    break;
 
   case 'b':
   case 'B':
-    return new Bishop({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Bishop({_pos.x, _pos.y}, isupper(piece));
+    break;
 
   case 'q':
   case 'Q':
-    return new Queen({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Queen({_pos.x, _pos.y}, isupper(piece));
+    break;
 
   case 'k':
   case 'K':
-    return new King({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new King({_pos.x, _pos.y}, isupper(piece));
+    if (isupper(piece))
+    {
+      whiteKing = piece_ptr;
+    }
+    else
+    {
+      blackKing = piece_ptr;
+    }
+    break;
 
   default:
     std::cerr << "Invalid piece" << std::endl;
     throw "Invalid piece";
   }
 
-  std::cerr << "Unreachable" << std::endl;
-  throw "Unreachable";
+  if (isupper(piece))
+  {
+    whitePieces.push_back(piece_ptr);
+  }
+  else if (islower(piece))
+  {
+    blackPieces.push_back(piece_ptr);
+  }
+
+  return piece_ptr;
+}
+
+bool Board::castlingAvailable(moveType::MoveType _type, bool _isWhitePiece)
+{
+  int offset = _isWhitePiece ? 0 : 2;
+  int pieceOffset = 0;
+  if (_type == moveType::KingsideCastle)
+  {
+    pieceOffset = 0;
+  }
+  else if (_type == moveType::QueensideCastle)
+  {
+    pieceOffset = 1;
+  }
+  else
+  {
+    throw "Invalid movetype for checking castling availablity";
+  }
+
+  return canCastle[offset + pieceOffset];
 }

@@ -27,6 +27,12 @@ class Board
     // The number of the full moves. It starts at 1 and is incremented after Black's move.
     int fullMoveClock;
 
+protected:
+    Piece *whiteKing;
+    Piece *blackKing;
+    std::vector<Piece *> whitePieces;
+    std::vector<Piece *> blackPieces;
+
 public:
     Board();
     ~Board();
@@ -37,6 +43,7 @@ public:
     int fromFEN(std::string fen);
 
     void display();
+    void display_meta();
 
     bool getBoardColorAt(int _x, int _y);
 
@@ -47,11 +54,13 @@ public:
     bool isOpponentInCheck();
     bool isPlayerInCheck();
 
+    bool castlingAvailable(moveType::MoveType _type, bool _isWhitePiece);
+
     Piece *getPieceAt(Coordinate _coord);
     void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);
     void perfomMove(Move _move);
-};
 
-Piece*createPiece(Coordinate _coord, char type);
+    Piece *createPiece(Coordinate _coord, char type);
+};
