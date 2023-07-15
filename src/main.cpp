@@ -2,6 +2,7 @@
 #include "headers/board.h"
 #include <vector>
 #include "headers/test.h"
+#define SDL_MAIN_HANDLED 1
 
 void show_valid_positions_at(Coordinate coord, Board &board)
 {
@@ -29,9 +30,9 @@ void show_valid_positions_at(Coordinate coord, Board &board)
 
 int main()
 {
-    char fen[] = "r3k2r/ppp1pppp/8/1B1p4/8/4P3/PPPP1PPP/RNBQK1NR b KQkq - 1 2";
+    char fen[] = "2bqkbnr/Pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
     using namespace std;
-    Board board = Board(string(fen));
+    Board board{string(fen)};
 
     // Piece *piece = board.getPieceAt({0, 4});
     // if (piece == nullptr)
@@ -40,7 +41,13 @@ int main()
     //     throw "Null";
     // }
 
-    // std::vector<Move> legal = piece->getLegalMoves(board);
+    // board.display();
+    board.perfomMove({{1, 0}, {0, 0}, moveType::Normal});
+    // board.display();
+    // board.perfomMove({{1, 3}, {0, 3}, moveType::Normal});
+    board.display();
+
+    // std::vector<Move> legal = board.getAllPlayerMoves(true);
     // if (legal.size() == 0)
     // {
     //     cout << "No legal moves found for this position" << endl;
@@ -53,12 +60,6 @@ int main()
     //         cout << legal[i] << endl;
     //     }
     // }
-
-    board.display();
-    board.perfomMove({{0, 2}, {1, 3}, moveType::Capture});
-    board.display();
-    board.perfomMove({{1, 2}, {2, 2}, moveType::Normal});
-    board.display();
 
     return 0;
 }

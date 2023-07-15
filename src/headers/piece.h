@@ -16,7 +16,6 @@ public:
 
     Coordinate getPosition();
     bool isWhite();
-    std::vector<Move> getValidMoves();
 
     // Get all moves, including invalid(cannot move due to check, blocking pieces) ones
     virtual std::vector<Move> getAllMoves(Board &_board);

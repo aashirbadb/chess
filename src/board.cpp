@@ -43,6 +43,10 @@ Board::Board(Board &src)
 
 Board::~Board()
 {
+  for (int i = 0; i < allCreatedPiece.size(); i++)
+  {
+    delete allCreatedPiece[i];
+  }
 }
 
 // https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -129,7 +133,8 @@ int Board::fromFEN(std::string fen)
   }
   else
   {
-    enPassantTarget = {fen[index + 1] - '1', fen[index] - 'a'};
+    // enPassantTarget = {fen[index + 1] - '1', fen[index] - 'a'};
+    enPassantTarget = {fen[index], fen[index + 1]};
     index += 2;
   }
   index++;
@@ -341,7 +346,6 @@ void Board::moveUnchecked(Move _move)
 
 void Board::perfomMove(Move _move)
 {
-  std::cout << _move << std::endl;
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
 
@@ -378,6 +382,16 @@ void Board::perfomMove(Move _move)
     {
       // TODO: handle castling
     }
+    else if ((_move.type == moveType::Promotion) ||
+             (tolower(startPiece->getSymbol()) == 'p' && _move.end.isPromotionSquare(startPiece->isWhite())))
+    {
+      // Promotion
+      // TODO: Allow user to choose promotion piece
+      Piece *promotionPiece = createPiece(_move.end, startPiece->isWhite() ? 'Q' : 'q');
+      pieces[_move.start.x][_move.start.y] = nullptr;
+      pieces[_move.end.x][_move.end.y] = promotionPiece;
+      // pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+    }
     else
     {
       pieces[_move.start.x][_move.start.y] = nullptr;
@@ -402,6 +416,44 @@ void Board::perfomMove(Move _move)
     else
     {
       halfMoveClock++;
+    }
+
+    char startSymbol = startPiece->getSymbol();
+    // White kingside castle
+    if (startSymbol == 'R' && (_move.start == Coordinate{7, 7}))
+    {
+      canCastle[0] == false;
+    }
+
+    // White queenside castle
+    if (startSymbol == 'R' && (_move.start == Coordinate{7, 0}))
+    {
+      canCastle[1] = false;
+    }
+
+    // White kingside castle
+    if (startSymbol == 'r' && (_move.start == Coordinate{0, 7}))
+    {
+      canCastle[2] == false;
+    }
+
+    // White queenside castle
+    if (startSymbol == 'r' && (_move.start == Coordinate{0, 0}))
+    {
+      canCastle[3] = false;
+    }
+
+    // If king moves, no castle available for the player
+    if (startSymbol == 'K')
+    {
+      canCastle[0] = false;
+      canCastle[1] = false;
+    }
+
+    if (startSymbol == 'k')
+    {
+      canCastle[2] = false;
+      canCastle[3] = false;
     }
   }
   else
@@ -459,6 +511,8 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
     throw "Invalid piece";
   }
 
+  allCreatedPiece.push_back(piece_ptr);
+
   if (isupper(piece))
   {
     whitePieces.push_back(piece_ptr);
@@ -489,4 +543,26 @@ bool Board::castlingAvailable(moveType::MoveType _type, bool _isWhitePiece)
   }
 
   return canCastle[offset + pieceOffset];
+}
+
+std::vector<Move> Board::getAllPlayerMoves(bool _white)
+{
+  std::vector<Piece *> allpieces = _white ? whitePieces : blackPieces;
+  std::vector<Move> allMoves;
+
+  for (int i = 0; i < allpieces.size(); i++)
+  {
+    std::vector<Move> movesForPiece = allpieces[i]->getAllMoves(*this);
+    for (int j = 0; j < movesForPiece.size(); j++)
+    {
+      allMoves.push_back(movesForPiece[j]);
+    }
+  }
+
+  return allMoves;
+}
+
+Coordinate Board::getEnpassantTarget()
+{
+  return enPassantTarget;
 }

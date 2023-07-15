@@ -32,6 +32,10 @@ std::vector<Move> Queen::getAllMoves(Board &_board)
             {
                 moves.push_back(Move{.start = position, .end = next_position, moveType::Normal});
             }
+            else
+            {
+                break;
+            }
 
             next_position = {next_position.x + direction.x,
                              next_position.y + direction.y};

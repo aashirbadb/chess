@@ -45,6 +45,34 @@ struct Coordinate
         coord[2] = '\0';
         return coord;
     }
+
+    Coordinate(char a, char b)
+    {
+        y = a - 'a';
+        x = '1' + 7 - b;
+    }
+
+    Coordinate(int a, int b)
+    {
+        x = a;
+        y = b;
+    }
+
+    Coordinate()
+    {
+    }
+
+    bool isPromotionSquare(bool isWhitePiece)
+    {
+        if ((isWhitePiece && x == 0) || (!isWhitePiece && x == 7))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 };
 
 inline std::ostream &operator<<(std::ostream &o, Coordinate &c)
@@ -61,4 +89,9 @@ inline std::ostream &operator<<(std::ostream &o, Coordinate &c)
     }
 
     return o;
+}
+
+inline bool operator==(Coordinate a, Coordinate b)
+{
+    return (a.x == b.x && a.y == b.y);
 }

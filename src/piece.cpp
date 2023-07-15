@@ -22,7 +22,6 @@ bool Piece::isWhite()
 {
     return isColorWhite;
 }
-std::vector<Move> Piece::getValidMoves() { return std::vector<Move>(); }
 
 std::vector<Move> Piece::getAllMoves(Board &_board)
 {

@@ -31,6 +31,8 @@ std::vector<Move> Rook::getAllMoves(Board &_board)
             else if (_board.getPieceAt(next_position) == nullptr)
             {
                 moves.push_back(Move{position, next_position, moveType::Normal});
+            }else{
+                break;
             }
 
             next_position = {next_position.x + direction.x,

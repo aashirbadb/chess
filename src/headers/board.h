@@ -18,6 +18,10 @@ const std::string SOME_FEN = std::string("rnbqkbnr/pp2pppp/8/2pp4/4P3/5N2/PPPP1P
 
 class Board
 {
+private:
+    std::vector<Piece *> allCreatedPiece;
+
+protected:
     Piece *pieces[8][8];
     bool isWhiteTurn;
     bool canCastle[4];
@@ -26,8 +30,6 @@ class Board
     int halfMoveClock;
     // The number of the full moves. It starts at 1 and is incremented after Black's move.
     int fullMoveClock;
-
-protected:
     Piece *whiteKing;
     Piece *blackKing;
     std::vector<Piece *> whitePieces;
@@ -54,9 +56,12 @@ public:
     bool isOpponentInCheck();
     bool isPlayerInCheck();
 
+    std::vector<Move> getAllPlayerMoves(bool _white);
+
     bool castlingAvailable(moveType::MoveType _type, bool _isWhitePiece);
 
     Piece *getPieceAt(Coordinate _coord);
+    Coordinate getEnpassantTarget();
     void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);

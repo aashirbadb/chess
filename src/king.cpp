@@ -36,6 +36,11 @@ std::vector<Move> King::getAllMoves(Board &_board)
     }
 
     // TODO: Generate moves for castling
+    // Castling rules:
+    // - The king is not in check
+    // - The rook/king should not have moved
+    // - Any path from king to rook should not be attacked by any piece
+    // std::vector<Move> opponentAllMoves = _board.getAllPlayerMoves(!isColorWhite);
 
     return moves;
 }
