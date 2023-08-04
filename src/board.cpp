@@ -6,27 +6,30 @@
 
 Board::Board()
 {
+  Board::created++;
   fromFEN(STARTING_FEN);
 }
 
 Board::Board(std::string fen)
 {
+  Board::created++;
   fromFEN(fen);
 }
 
 Board::Board(Board &src)
 {
+  Board::created++;
   for (int i = 0; i < 8; i++)
   {
     for (int j = 0; j < 8; j++)
     {
-      if (src.pieces[i][j] == nullptr)
+      if (src.pieces[j][i] == nullptr)
       {
-        pieces[i][j] = nullptr;
+        pieces[j][i] = nullptr;
       }
       else
       {
-        pieces[i][j] = createPiece(src.pieces[i][j]->getPosition(), src.pieces[i][j]->getSymbol());
+        pieces[j][i] = createPiece(src.pieces[j][i]->getPosition(), src.pieces[j][i]->getSymbol());
       }
     }
   }
@@ -41,14 +44,17 @@ Board::Board(Board &src)
   fullMoveClock = src.fullMoveClock;
 }
 
+int Board::created = 0;
+int Board::removed = 0;
+
 Board::~Board()
 {
-  std::cout << "deleted board\n";
+  Board::removed++;
+  // std::cout << "Created: " << Board::created << " removed: " << Board::removed << "Total: " << Board::created - Board::removed << std::endl;
   for (int i = 0; i < allCreatedPiece.size(); i++)
   {
     delete allCreatedPiece[i];
   }
-
 }
 
 // https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -62,7 +68,7 @@ int Board::fromFEN(std::string fen)
   {
     for (int j = 0; j < 8; j++)
     {
-      pieces[i][j] = nullptr;
+      pieces[j][i] = nullptr;
     }
   }
 
@@ -77,18 +83,18 @@ int Board::fromFEN(std::string fen)
     index++;
     if (current_char == '/')
     {
-      current_x++;
-      current_y = 0;
+      current_y++;
+      current_x = 0;
       continue;
     }
     else if (isdigit(current_char))
     {
-      current_y += current_char - '0';
+      current_x += current_char - '0';
     }
     else
     {
-      pieces[current_x][current_y] = createPiece({current_x, current_y}, current_char);
-      current_y++;
+      pieces[current_y][current_x] = createPiece({current_x, current_y}, current_char);
+      current_x++;
     }
   }
   index++; // Skip space
@@ -234,7 +240,7 @@ bool Board::getBoardColorAt(int x, int y)
 
 Piece *Board::getPieceAt(Coordinate _coord)
 {
-  return pieces[_coord.x][_coord.y];
+  return pieces[_coord.y][_coord.x];
 }
 
 bool Board::isWhiteInCheck()
@@ -257,7 +263,7 @@ bool Board::isWhiteInCheck()
     {
       if (moves[j].end.x == whiteKing->getPosition().x && moves[j].end.y == whiteKing->getPosition().y)
       {
-        std::cout << "Here" << std::endl;
+        std::cout << "White in check" << std::endl;
         whiteInCheck = true;
         break;
       }
@@ -336,7 +342,7 @@ void Board::moveUnchecked(Move _move)
 
   if (startPiece == nullptr)
   {
-    std::cout << "There is no piece to move" << std::endl;
+    std::cerr << "There is no piece to move" << std::endl;
     throw "There is no piece to move";
   }
 
@@ -346,7 +352,7 @@ void Board::moveUnchecked(Move _move)
   pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
 }
 
-void Board::perfromMove(Move _move)
+void Board::performMove(Move _move)
 {
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
@@ -390,15 +396,15 @@ void Board::perfromMove(Move _move)
       // Promotion
       // TODO: Allow user to choose promotion piece
       Piece *promotionPiece = createPiece(_move.end, startPiece->isWhite() ? 'Q' : 'q');
-      pieces[_move.start.x][_move.start.y] = nullptr;
-      pieces[_move.end.x][_move.end.y] = promotionPiece;
-      // pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+      pieces[_move.start.y][_move.start.x] = nullptr;
+      pieces[_move.end.y][_move.end.x] = promotionPiece;
+      // pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
     }
     else
     {
-      pieces[_move.start.x][_move.start.y] = nullptr;
-      pieces[_move.end.x][_move.end.y] = startPiece;
-      pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+      pieces[_move.start.y][_move.start.x] = nullptr;
+      pieces[_move.end.y][_move.end.x] = startPiece;
+      pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
     }
 
     // Increment fullMoveClock on black turn

@@ -2,7 +2,7 @@
 
 Pawn::Pawn(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
-    if ((_pos.x == 6 && _isColorWhite) || (_pos.x == 1 && !_isColorWhite))
+    if ((_pos.y == 6 && _isColorWhite) || (_pos.y == 1 && !_isColorWhite))
     {
         firstMove = true;
     }
@@ -25,8 +25,8 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
 {
     std::vector<Move> moves;
     int direction = isColorWhite ? -1 : 1;
-    Coordinate oneahead = {position.x + direction, position.y};
-    Coordinate twoahead = {position.x + direction * 2, position.y};
+    Coordinate oneahead = {position.x, position.y + direction};
+    Coordinate twoahead = {position.x, position.y + direction * 2};
     bool oneaheadallowed = false;
 
     // One move ahead

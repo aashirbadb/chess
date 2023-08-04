@@ -21,6 +21,8 @@ class Board
 private:
     std::vector<Piece *> allCreatedPiece;
 
+    static int created, removed;
+
 protected:
     Piece *pieces[8][8];
     bool isWhiteTurn;
@@ -65,7 +67,7 @@ public:
     void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);
-    void perfromMove(Move _move);
+    void performMove(Move _move);
 
     Piece *createPiece(Coordinate _coord, char type);
 };

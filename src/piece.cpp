@@ -23,15 +23,6 @@ bool Piece::isWhite()
     return isColorWhite;
 }
 
-std::vector<Move> Piece::getAllMoves(Board &_board)
-{
-    return std::vector<Move>();
-}
-char Piece::getSymbol()
-{
-    return '*'; // This should never be called. TODO: use throw here
-}
-
 bool Piece::isOpponentPieceAt(Coordinate _coord, Board &_board)
 {
     Piece *_piece = _board.getPieceAt(_coord);
@@ -60,6 +51,7 @@ bool Piece::isOwnPieceAt(Coordinate _coord, Board &_board)
 
 std::vector<Move> Piece::getLegalMoves(Board &_board)
 {
+    // TODO: Doesn't return valid moves
     std::vector<Move> allMoves = getAllMoves(_board);
     std::vector<Move> legalMoves;
 

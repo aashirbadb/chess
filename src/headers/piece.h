@@ -18,10 +18,10 @@ public:
     bool isWhite();
 
     // Get all moves, including invalid(cannot move due to check, blocking pieces) ones
-    virtual std::vector<Move> getAllMoves(Board &_board);
+    virtual std::vector<Move> getAllMoves(Board &_board) = 0;
 
     // Get the symbol of the piece(to show in the console)
-    virtual char getSymbol();
+    virtual char getSymbol() = 0;
 
     // returns true if there is opponent piece in given coordinate
     bool isOpponentPieceAt(Coordinate _coord, Board &_board);

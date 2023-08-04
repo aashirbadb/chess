@@ -17,8 +17,9 @@ struct Coordinate
 
     Coordinate(char a, char b)
     {
-        y = a - 'a';
-        x = '1' + 7 - b;
+
+        x = a - 'a';
+        y = '1' + 7 - b;
     }
 
     void display()
@@ -56,12 +57,11 @@ struct Coordinate
     char *getChessCoordinate()
     {
         char *coord = new char[3];
-        coord[0] = 'a' + y;
-        coord[1] = '1' + 7 - x;
+        coord[0] = 'a' + x;
+        coord[1] = '1' + 7 - y;
         coord[2] = '\0';
         return coord;
     }
-
 
     bool isPromotionSquare(bool isWhitePiece)
     {
