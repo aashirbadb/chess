@@ -5,6 +5,22 @@ struct Coordinate
 {
     int x, y;
 
+    Coordinate()
+    {
+    }
+
+    Coordinate(int a, int b)
+    {
+        x = a;
+        y = b;
+    }
+
+    Coordinate(char a, char b)
+    {
+        y = a - 'a';
+        x = '1' + 7 - b;
+    }
+
     void display()
     {
         if (isValidPosition())
@@ -46,21 +62,6 @@ struct Coordinate
         return coord;
     }
 
-    Coordinate(char a, char b)
-    {
-        y = a - 'a';
-        x = '1' + 7 - b;
-    }
-
-    Coordinate(int a, int b)
-    {
-        x = a;
-        y = b;
-    }
-
-    Coordinate()
-    {
-    }
 
     bool isPromotionSquare(bool isWhitePiece)
     {

@@ -43,10 +43,12 @@ Board::Board(Board &src)
 
 Board::~Board()
 {
+  std::cout << "deleted board\n";
   for (int i = 0; i < allCreatedPiece.size(); i++)
   {
     delete allCreatedPiece[i];
   }
+
 }
 
 // https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
@@ -344,7 +346,7 @@ void Board::moveUnchecked(Move _move)
   pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
 }
 
-void Board::perfomMove(Move _move)
+void Board::perfromMove(Move _move)
 {
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
@@ -378,11 +380,11 @@ void Board::perfomMove(Move _move)
 
   if (isValidMove)
   {
-    if (_move.type == moveType::KingsideCastle || _move.type == moveType::QueensideCastle)
+    if (_move.type == MoveType::KingsideCastle || _move.type == MoveType::QueensideCastle)
     {
       // TODO: handle castling
     }
-    else if ((_move.type == moveType::Promotion) ||
+    else if ((_move.type == MoveType::Promotion) ||
              (tolower(startPiece->getSymbol()) == 'p' && _move.end.isPromotionSquare(startPiece->isWhite())))
     {
       // Promotion
@@ -409,7 +411,7 @@ void Board::perfomMove(Move _move)
     enPassantTarget = {-1, -1}; // reset enpassant target every turn
 
     // Halfmove clock increments every piece but resets when there is pawn movement or capture
-    if (startPiece->getSymbol() == 'p' || startPiece->getSymbol() == 'P' || _move.type == moveType::Capture)
+    if (startPiece->getSymbol() == 'p' || startPiece->getSymbol() == 'P' || _move.type == MoveType::Capture)
     {
       halfMoveClock = 0;
     }
@@ -419,6 +421,9 @@ void Board::perfomMove(Move _move)
     }
 
     char startSymbol = startPiece->getSymbol();
+
+    // Remove availability if rook or king moves
+
     // White kingside castle
     if (startSymbol == 'R' && (_move.start == Coordinate{7, 7}))
     {
@@ -525,15 +530,15 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
   return piece_ptr;
 }
 
-bool Board::castlingAvailable(moveType::MoveType _type, bool _isWhitePiece)
+bool Board::castlingAvailable(MoveType _type, bool _isWhitePiece)
 {
   int offset = _isWhitePiece ? 0 : 2;
   int pieceOffset = 0;
-  if (_type == moveType::KingsideCastle)
+  if (_type == MoveType::KingsideCastle)
   {
     pieceOffset = 0;
   }
-  else if (_type == moveType::QueensideCastle)
+  else if (_type == MoveType::QueensideCastle)
   {
     pieceOffset = 1;
   }

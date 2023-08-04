@@ -58,14 +58,14 @@ public:
 
     std::vector<Move> getAllPlayerMoves(bool _white);
 
-    bool castlingAvailable(moveType::MoveType _type, bool _isWhitePiece);
+    bool castlingAvailable(MoveType _type, bool _isWhitePiece);
 
     Piece *getPieceAt(Coordinate _coord);
     Coordinate getEnpassantTarget();
     void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);
-    void perfomMove(Move _move);
+    void perfromMove(Move _move);
 
     Piece *createPiece(Coordinate _coord, char type);
 };

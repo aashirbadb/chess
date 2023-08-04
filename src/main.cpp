@@ -1,8 +1,9 @@
-#include <stdio.h>
+#define SDL_MAIN_HANDLED 1
+#include <iostream>
 #include "headers/board.h"
 #include <vector>
 #include "headers/test.h"
-#define SDL_MAIN_HANDLED 1
+#include "headers/game.h"
 
 void show_valid_positions_at(Coordinate coord, Board &board)
 {
@@ -30,9 +31,12 @@ void show_valid_positions_at(Coordinate coord, Board &board)
 
 int main()
 {
-    char fen[] = "2bqkbnr/Pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
-    using namespace std;
-    Board board{string(fen)};
+    Game game;
+    game.start();
+    
+    // char fen[] = "2bqkbnr/Pppppppp/8/8/8/8/1PPPPPPP/RNBQKBNR w KQkq - 0 1";
+    // using namespace std;
+    // Board board{string(fen)};
 
     // Piece *piece = board.getPieceAt({0, 4});
     // if (piece == nullptr)
@@ -42,10 +46,10 @@ int main()
     // }
 
     // board.display();
-    board.perfomMove({{1, 0}, {0, 0}, moveType::Normal});
+    // board.perfromMove({{1, 0}, {0, 0}, MoveType::Normal});
     // board.display();
-    // board.perfomMove({{1, 3}, {0, 3}, moveType::Normal});
-    board.display();
+    // board.perfromMove({{1, 3}, {0, 3}, MoveType::Normal});
+    // board.display();
 
     // std::vector<Move> legal = board.getAllPlayerMoves(true);
     // if (legal.size() == 0)

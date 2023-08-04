@@ -31,6 +31,8 @@
 *.out
 *.app
 
+.cache
+
 build
 
 *.pgn
