@@ -1,24 +1,20 @@
 #include "headers/board.h"
 #include <iomanip>
-
-// TODO: Add gamestate variable that stores gamestate(Playing, Check, CheckMate, Stalemate, Draw)
-// TODO: Check for checkmates and stalemates
+#include "headers/utils.h"
+#include <stdlib.h>
 
 Board::Board()
 {
-  Board::created++;
   fromFEN(STARTING_FEN);
 }
 
 Board::Board(std::string fen)
 {
-  Board::created++;
   fromFEN(fen);
 }
 
 Board::Board(Board &src)
 {
-  Board::created++;
   for (int i = 0; i < 8; i++)
   {
     for (int j = 0; j < 8; j++)
@@ -44,13 +40,8 @@ Board::Board(Board &src)
   fullMoveClock = src.fullMoveClock;
 }
 
-int Board::created = 0;
-int Board::removed = 0;
-
 Board::~Board()
 {
-  Board::removed++;
-  // std::cout << "Created: " << Board::created << " removed: " << Board::removed << "Total: " << Board::created - Board::removed << std::endl;
   for (int i = 0; i < allCreatedPiece.size(); i++)
   {
     delete allCreatedPiece[i];
@@ -61,7 +52,7 @@ Board::~Board()
 int Board::fromFEN(std::string fen)
 {
   using namespace std;
-  cout << "Parsing FEN: " << fen << endl;
+  cerr << "Parsing FEN: " << fen << endl;
 
   // Clear the board
   for (int i = 0; i < 8; i++)
@@ -148,13 +139,28 @@ int Board::fromFEN(std::string fen)
   index++;
 
   // Halfmove clock
-  halfMoveClock = fen[index++] - '0';
+  char buf1[8] = {'\0'};
+  int idx = 0;
+  while (isdigit(fen[index]))
+  {
+    buf1[idx++] = fen[index++];
+  }
+  halfMoveClock = atoi(buf1);
   index++;
 
   // Fullmove clock
-  fullMoveClock = fen[index++] - '0';
+  char buf2[8] = {'\0'};
+  idx = 0;
+  while (isdigit(fen[index]))
+  {
+    buf2[idx++] = fen[index++];
+  }
+  fullMoveClock = atoi(buf2);
 
-  cout << "Successfully parsed FEN" << endl;
+  cerr << "Successfully parsed FEN" << endl;
+
+  // Other things
+  state = GameState::Playing;
 
   return 0;
 }
@@ -253,6 +259,8 @@ bool Board::isWhiteInCheck()
     throw "Cannot find white king";
   }
 
+  std::vector<Piece *> blackPieces = getBlackPieces();
+
   for (int i = 0; i < blackPieces.size(); i++)
   {
     if (whiteInCheck)
@@ -262,7 +270,6 @@ bool Board::isWhiteInCheck()
     {
       if (moves[j].end == whiteKing->getPosition())
       {
-        std::cout << "White in check" << std::endl;
         whiteInCheck = true;
         break;
       }
@@ -281,6 +288,8 @@ bool Board::isBlackInCheck()
     std::cerr << "Cannot find black king" << std::endl;
     throw "Cannot find black king";
   }
+
+  std::vector<Piece *> whitePieces = getWhitePieces();
 
   for (int i = 0; i < whitePieces.size(); i++)
   {
@@ -470,6 +479,34 @@ void Board::performMove(Move _move)
   {
     std::cerr << "Trying to perform an invalid move: " << _move << std::endl;
   }
+
+  if (halfMoveClock >= 50)
+  {
+    std::cerr << "Draw!" << std::endl;
+    state = GameState::Draw;
+  }
+
+  // Check for stalemates and checkmates
+  std::vector<Move> allMoves = getAllPlayerMoves(isWhiteTurn);
+  if (allMoves.size() == 0 && isPlayerInCheck())
+  {
+    if (isWhiteTurn)
+    {
+      state = GameState::BlackWins;
+    }
+    else
+    {
+      state = GameState::WhiteWins;
+    }
+    std::cerr << "Checkmate!\n"
+              << (isWhiteTurn ? "Black Wins!" : "White wins!") << std::endl;
+  }
+  else if (allMoves.size() == 0)
+  {
+    state = GameState::Stalemate;
+    std::cerr
+        << "Stalemate!" << std::endl;
+  }
 }
 
 // Helper function to create a piece at given coordinate
@@ -523,15 +560,6 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
 
   allCreatedPiece.push_back(piece_ptr);
 
-  if (isupper(piece))
-  {
-    whitePieces.push_back(piece_ptr);
-  }
-  else if (islower(piece))
-  {
-    blackPieces.push_back(piece_ptr);
-  }
-
   return piece_ptr;
 }
 
@@ -557,12 +585,12 @@ bool Board::castlingAvailable(MoveType _type, bool _isWhitePiece)
 
 std::vector<Move> Board::getAllPlayerMoves(bool _white)
 {
-  std::vector<Piece *> allpieces = _white ? whitePieces : blackPieces;
+  std::vector<Piece *> allpieces = _white ? getWhitePieces() : getBlackPieces();
   std::vector<Move> allMoves;
 
   for (int i = 0; i < allpieces.size(); i++)
   {
-    std::vector<Move> movesForPiece = allpieces[i]->getAllMoves(*this);
+    std::vector<Move> movesForPiece = allpieces[i]->getLegalMoves(*this);
     for (int j = 0; j < movesForPiece.size(); j++)
     {
       allMoves.push_back(movesForPiece[j]);
@@ -580,4 +608,53 @@ Coordinate Board::getEnpassantTarget()
 void Board::setPlayerTurn(bool _turn)
 {
   isWhiteTurn = _turn;
+}
+
+std::vector<Piece *> Board::getWhitePieces()
+{
+  std::vector<Piece *> pcs;
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      if (pieces[j][i] != nullptr && pieces[j][i]->isWhite())
+      {
+        pcs.push_back(pieces[j][i]);
+      }
+    }
+  }
+
+  return pcs;
+}
+
+std::vector<Piece *> Board::getBlackPieces()
+{
+  std::vector<Piece *> pcs;
+  for (int i = 0; i < 8; i++)
+  {
+    for (int j = 0; j < 8; j++)
+    {
+      if (pieces[j][i] != nullptr && !pieces[j][i]->isWhite())
+      {
+        pcs.push_back(pieces[j][i]);
+      }
+    }
+  }
+
+  return pcs;
+}
+
+Piece *Board::getWhiteKing()
+{
+  return whiteKing;
+}
+
+Piece *Board::getBlackKing()
+{
+  return blackKing;
+}
+
+GameState Board::getGameState()
+{
+  return state;
 }

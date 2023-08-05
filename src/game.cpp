@@ -14,7 +14,7 @@ Game::Game()
 
     font = TTF_OpenFont("assets/Roboto.ttf", 24);
 
-    board = new Board(SOME_FEN);
+    board = new Board(STARTING_FEN);
     selected_piece = nullptr;
 }
 
@@ -41,6 +41,8 @@ void Game::start()
         if (render_requested)
             drawBoard();
         render_requested = false;
+        GameState state = board->getGameState();
+        quit = (state == GameState::WhiteWins) || (state == GameState::BlackWins) || (state == GameState::Stalemate) || (state == GameState::Draw); // TODO:
     }
 }
 
@@ -86,6 +88,22 @@ void Game::drawBoard()
             SDL_RenderFillRect(renderer, &rect);
         }
         startPos = 1 - startPos;
+    }
+
+    if (board->isWhiteInCheck())
+    {
+        Coordinate pos = board->getWhiteKing()->getPosition();
+        SDL_Rect rect = {pos.x * SQUARE_SIZE, pos.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
+        SDL_SetRenderDrawColor(renderer, 128, 0, 0, 200);
+        SDL_RenderFillRect(renderer, &rect);
+    }
+
+    if (board->isBlackInCheck())
+    {
+        Coordinate pos = board->getBlackKing()->getPosition();
+        SDL_Rect rect = {pos.x * SQUARE_SIZE, pos.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
+        SDL_SetRenderDrawColor(renderer, 128, 0, 0, 200);
+        SDL_RenderFillRect(renderer, &rect);
     }
 
     // Highlight selected piece and show valid moves
@@ -153,7 +171,6 @@ void Game::handleMouseLeftClick()
         {
             if (moves[i].end == selected_coord)
             {
-                std::cout << moves[i] << std::endl;
                 board->performMove(moves[i]);
                 selected_piece = nullptr;
                 render_requested = true;

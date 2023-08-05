@@ -17,36 +17,8 @@ struct Coordinate
 
     Coordinate(char a, char b)
     {
-
         x = a - 'a';
         y = '1' + 7 - b;
-    }
-
-    void display()
-    {
-        if (isValidPosition())
-        {
-            std::cout << "(" << x << ", " << y << ")\n";
-        }
-        else
-        {
-            std::cout << "Not a valid position"
-                      << "(" << x << ", " << y << ")" << std::endl;
-        }
-    }
-
-    void displayChessCoordinate()
-    {
-        if (isValidPosition())
-        {
-
-            std::cout << getChessCoordinate() << std::endl;
-        }
-        else
-        {
-            std::cout << "Not a valid position"
-                      << "(" << x << ", " << y << ")" << std::endl;
-        }
     }
 
     bool isValidPosition()
@@ -65,7 +37,7 @@ struct Coordinate
 
     bool isPromotionSquare(bool isWhitePiece)
     {
-        if ((isWhitePiece && x == 0) || (!isWhitePiece && x == 7))
+        if ((isWhitePiece && y == 0) || (!isWhitePiece && y == 7))
         {
             return true;
         }

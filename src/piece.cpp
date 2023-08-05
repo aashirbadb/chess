@@ -51,13 +51,7 @@ bool Piece::isOwnPieceAt(Coordinate _coord, Board &_board)
 
 std::vector<Move> Piece::getLegalMoves(Board &_board)
 {
-    // TODO: Doesn't return valid moves
     std::vector<Move> allMoves = getAllMoves(_board);
-    for (int i = 0; i < allMoves.size(); i++)
-    {
-        std::cout << allMoves[i] << ", ";
-    }
-    std::cout << "\n";
 
     std::vector<Move> legalMoves;
 
@@ -65,10 +59,8 @@ std::vector<Move> Piece::getLegalMoves(Board &_board)
     {
         Board nextMoveBoardPosition(_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
-
         if (!nextMoveBoardPosition.isPlayerInCheck())
         {
-            nextMoveBoardPosition.display();
             legalMoves.push_back(allMoves[i]);
         }
     }

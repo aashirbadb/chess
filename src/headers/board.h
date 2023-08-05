@@ -14,14 +14,22 @@ class Piece;
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
 const std::string STARTING_FEN = std::string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-const std::string SOME_FEN = std::string("rnbqkbnr/pp2pppp/8/2pp4/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
+const std::string SOME_FEN = std::string("rnbqkbnr/pp2pppp/8/2p5/4P3/5N2/PPPp1PPP/RNBQKB1R w KQkq - 1 2");
+
+enum class GameState
+{
+    Playing,
+    Stalemate,
+    WhiteWins,
+    BlackWins,
+    Draw
+};
 
 class Board
 {
 private:
     std::vector<Piece *> allCreatedPiece;
-
-    static int created, removed;
+    GameState state;
 
 protected:
     Piece *pieces[8][8];
@@ -34,8 +42,6 @@ protected:
     int fullMoveClock;
     Piece *whiteKing;
     Piece *blackKing;
-    std::vector<Piece *> whitePieces;
-    std::vector<Piece *> blackPieces;
 
 public:
     Board();
@@ -52,6 +58,9 @@ public:
     bool getBoardColorAt(int _x, int _y);
 
     bool getIsWhiteTurn();
+
+    std::vector<Piece *> getWhitePieces();
+    std::vector<Piece *> getBlackPieces();
 
     bool isWhiteInCheck();
     bool isBlackInCheck();
@@ -71,4 +80,10 @@ public:
     void setPlayerTurn(bool _turn);
 
     Piece *createPiece(Coordinate _coord, char type);
+
+    Piece *getWhiteKing();
+
+    Piece *getBlackKing();
+
+    GameState getGameState();
 };
