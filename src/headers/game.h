@@ -10,6 +10,7 @@
 
 class Game
 {
+
 protected:
     bool quit;
     bool render_requested;
@@ -18,7 +19,6 @@ protected:
     SDL_Renderer *renderer;
     SDL_Event event;
     Board *board;
-    TTF_Font *font;
     Piece *selected_piece;
 
 public:
@@ -28,6 +28,8 @@ public:
     ~Game();
 
 private:
+    static char rowlabel[9], columnlabel[9];
+
     void handleEvent();
     void handleMouseLeftClick();
     void drawBoard();

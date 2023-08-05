@@ -4,6 +4,7 @@
 #include <vector>
 #include "headers/test.h"
 #include "headers/game.h"
+#include "headers/texture.h"
 
 void show_valid_positions_at(Coordinate coord, Board &board)
 {
@@ -45,6 +46,8 @@ int main(int argc, char **argv)
         board.performMove(Move{Coordinate('a', '5'), Coordinate('e', '1'), MoveType::Normal});
         board.display();
     }
+
+    Texture::clearTextures();
 
     return 0;
 }

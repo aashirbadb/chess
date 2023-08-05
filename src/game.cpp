@@ -1,6 +1,25 @@
 #include "headers/game.h"
+#include "headers/texture.h"
 #include <iostream>
 #include <SDL2/SDL_blendmode.h>
+
+char Game::columnlabel[9] = "abcdefgh";
+char Game::rowlabel[9] = "12345678";
+
+namespace color
+{
+    const SDL_Color WHITE = {255, 255, 255, SDL_ALPHA_OPAQUE};
+    const SDL_Color BLACK = {0, 0, 0, SDL_ALPHA_OPAQUE};
+    const SDL_Color RED = {255, 0, 0, SDL_ALPHA_OPAQUE};
+    const SDL_Color GREEN = {0, 255, 0, SDL_ALPHA_OPAQUE};
+    const SDL_Color BLUE = {0, 0, 255, SDL_ALPHA_OPAQUE};
+
+    const SDL_Color WHITE_TILE = WHITE;
+    const SDL_Color BLACK_TILE = BLACK;
+    const SDL_Color CHECK_TILE = RED;
+    const SDL_Color SELECTED_TILE = GREEN;
+    const SDL_Color MOVE_TILE = GREEN;
+}
 
 Game::Game()
 {
@@ -12,8 +31,6 @@ Game::Game()
     window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SQUARE_SIZE * 8, SQUARE_SIZE * 8, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    font = TTF_OpenFont("assets/Roboto.ttf", 24);
-
     board = new Board(STARTING_FEN);
     selected_piece = nullptr;
 }
@@ -22,7 +39,6 @@ Game::~Game()
 {
     delete board;
 
-    TTF_CloseFont(font);
     TTF_Quit();
 
     SDL_DestroyWindow(window);
@@ -35,14 +51,23 @@ void Game::start()
     while (!quit)
     {
         handleEvent();
+        // No need to render if user has quit
         if (quit)
             break;
 
+        // Render board/game only if render is requested
         if (render_requested)
+        {
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+            SDL_RenderClear(renderer);
             drawBoard();
+            SDL_RenderPresent(renderer);
+        }
         render_requested = false;
+
         GameState state = board->getGameState();
-        quit = (state == GameState::WhiteWins) || (state == GameState::BlackWins) || (state == GameState::Stalemate) || (state == GameState::Draw); // TODO:
+        // TODO: Currently game just stops if the game ends
+        quit = (state == GameState::WhiteWins) || (state == GameState::BlackWins) || (state == GameState::Stalemate) || (state == GameState::Draw);
     }
 }
 
@@ -70,26 +95,31 @@ void Game::handleEvent()
 
 void Game::drawBoard()
 {
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-    SDL_RenderClear(renderer);
-
-    // Draw squares
-    int startPos = 0;
+    // Draw board tiles
     for (int y = 0; y < 8; y++)
     {
-        for (int x = startPos; x < 8; x += 2)
+        for (int x = 0; x < 8; x++)
         {
-            SDL_Rect rect;
-            rect.x = x * SQUARE_SIZE;
-            rect.y = y * SQUARE_SIZE;
-            rect.w = SQUARE_SIZE;
-            rect.h = SQUARE_SIZE;
-            SDL_SetRenderDrawColor(renderer, 238, 238, 210, 200);
+            SDL_Color tilecolor;
+            if (board->getBoardColorAt(x, y))
+            {
+                tilecolor = color::WHITE;
+            }
+            else
+            {
+                tilecolor = color::BLACK;
+            }
+
+            SDL_Rect rect = {x * SQUARE_SIZE,
+                             y * SQUARE_SIZE,
+                             SQUARE_SIZE,
+                             SQUARE_SIZE};
+            SDL_SetRenderDrawColor(renderer, tilecolor.r, tilecolor.g, tilecolor.b, tilecolor.a);
             SDL_RenderFillRect(renderer, &rect);
         }
-        startPos = 1 - startPos;
     }
 
+    // Highlight if there is check
     if (board->isWhiteInCheck())
     {
         Coordinate pos = board->getWhiteKing()->getPosition();
@@ -106,7 +136,7 @@ void Game::drawBoard()
         SDL_RenderFillRect(renderer, &rect);
     }
 
-    // Highlight selected piece and show valid moves
+    // Highlight selected piece(tile) and show valid moves
     if (selected_piece != nullptr)
     {
         Coordinate pos = selected_piece->getPosition();
@@ -124,34 +154,42 @@ void Game::drawBoard()
         }
     }
 
+    // Render coordinate text
+    for (int i = 0; i < 8; i++)
+    {
+        Texture coltexture(renderer);
+        coltexture.loadChar(Game::columnlabel[i], SQUARE_SIZE / 5, color::BLUE);
+        SDL_Rect colrect = {i * SQUARE_SIZE, 8 * SQUARE_SIZE - coltexture.getHeight(), coltexture.getWidth(), coltexture.getHeight()};
+        coltexture.draw(NULL, &colrect);
+
+        Texture rowtexture(renderer);
+        rowtexture.loadChar(Game::rowlabel[7 - i], SQUARE_SIZE / 5, color::BLUE);
+        SDL_Rect rowrect = {8 * SQUARE_SIZE - rowtexture.getWidth(), i * SQUARE_SIZE, rowtexture.getWidth(), rowtexture.getHeight()};
+        rowtexture.draw(NULL, &rowrect);
+    }
+
     // Draw pieces
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
-            SDL_Rect rect;
-            rect.x = x * SQUARE_SIZE;
-            rect.y = y * SQUARE_SIZE;
-            rect.w = SQUARE_SIZE;
-            rect.h = SQUARE_SIZE;
-
+            SDL_Rect rect =
+                {
+                    x * SQUARE_SIZE,
+                    y * SQUARE_SIZE,
+                    SQUARE_SIZE,
+                    SQUARE_SIZE,
+                };
             if (board->getPieceAt({x, y}) != nullptr)
             {
                 // TODO: add piece textures
-
-                // Causes memory leak
-
-                std::string symbol;
-                symbol.push_back(board->getPieceAt({x, y})->getSymbol());
-                SDL_Surface *text = TTF_RenderText_Solid(font, symbol.c_str(), {255, 0, 0});
-                SDL_Texture *texttexture = SDL_CreateTextureFromSurface(renderer, text);
-                SDL_Rect dest = {x, y, text->w, text->h};
-                SDL_RenderCopy(renderer, texttexture, NULL, &rect);
-                SDL_DestroyTexture(texttexture);
+                Texture font(renderer);
+                font.loadChar(board->getPieceAt({x, y})->getSymbol(), SQUARE_SIZE, color::RED);
+                SDL_Rect dest = {rect.x + (SQUARE_SIZE - font.getWidth()) / 2, rect.y + (SQUARE_SIZE - font.getHeight()) / 2, font.getWidth(), font.getHeight()};
+                font.draw(NULL, &dest);
             }
         }
     }
-    SDL_RenderPresent(renderer);
 }
 
 void Game::handleMouseLeftClick()
