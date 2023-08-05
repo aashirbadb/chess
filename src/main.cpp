@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     {
         using namespace std;
         Board board{SOME_FEN};
-        board.display();
+        // board.display();
         board.performMove(Move{Coordinate('d', '8'), Coordinate('a', '5'), MoveType::Normal});
         board.performMove(Move{Coordinate('d', '2'), Coordinate('d', '4'), MoveType::Normal});
         board.performMove(Move{Coordinate('a', '5'), Coordinate('e', '1'), MoveType::Normal});

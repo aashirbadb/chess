@@ -68,6 +68,7 @@ public:
 
     void moveUnchecked(Move _move);
     void performMove(Move _move);
+    void setPlayerTurn(bool _turn);
 
     Piece *createPiece(Coordinate _coord, char type);
 };

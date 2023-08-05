@@ -246,7 +246,6 @@ Piece *Board::getPieceAt(Coordinate _coord)
 bool Board::isWhiteInCheck()
 {
   bool whiteInCheck = false;
-  bool blackInCheck = false;
 
   if (whiteKing == nullptr)
   {
@@ -261,7 +260,7 @@ bool Board::isWhiteInCheck()
     std::vector<Move> moves = blackPieces[i]->getAllMoves(*this);
     for (int j = 0; j < moves.size(); j++)
     {
-      if (moves[j].end.x == whiteKing->getPosition().x && moves[j].end.y == whiteKing->getPosition().y)
+      if (moves[j].end == whiteKing->getPosition())
       {
         std::cout << "White in check" << std::endl;
         whiteInCheck = true;
@@ -290,7 +289,7 @@ bool Board::isBlackInCheck()
       break;
     for (int j = 0; j < moves.size(); j++)
     {
-      if (moves[j].end.x == blackKing->getPosition().x && moves[j].end.y == blackKing->getPosition().y)
+      if (moves[j].end == blackKing->getPosition())
       {
         blackInCheck = true;
         break;
@@ -347,9 +346,9 @@ void Board::moveUnchecked(Move _move)
   }
 
   // Move directly
-  pieces[_move.start.x][_move.start.y] = nullptr;
-  pieces[_move.end.x][_move.end.y] = startPiece;
-  pieces[_move.end.x][_move.end.y]->updateCoordinate(_move.end);
+  pieces[_move.start.y][_move.start.x] = nullptr;
+  pieces[_move.end.y][_move.end.x] = startPiece;
+  pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
 }
 
 void Board::performMove(Move _move)
@@ -576,4 +575,9 @@ std::vector<Move> Board::getAllPlayerMoves(bool _white)
 Coordinate Board::getEnpassantTarget()
 {
   return enPassantTarget;
+}
+
+void Board::setPlayerTurn(bool _turn)
+{
+  isWhiteTurn = _turn;
 }

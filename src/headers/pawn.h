@@ -4,9 +4,9 @@
 
 class Pawn : public Piece
 {
-    bool firstMove; // Pawns can move 2 squares on their first move
 
 public:
+    bool isFirstMove(); // Pawns can move 2 squares on their first move
     Pawn(Coordinate _pos, bool _isWhite);
     ~Pawn();
     std::vector<Move> getAllMoves(Board &_board) override;

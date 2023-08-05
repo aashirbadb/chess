@@ -1,15 +1,10 @@
 #include "headers/pawn.h"
 
-Pawn::Pawn(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
+Pawn::Pawn(Coordinate _pos, bool _isWhite) : Piece(_pos, _isWhite) {}
+
+inline bool Pawn::isFirstMove()
 {
-    if ((_pos.y == 6 && _isColorWhite) || (_pos.y == 1 && !_isColorWhite))
-    {
-        firstMove = true;
-    }
-    else
-    {
-        firstMove = false;
-    }
+    return ((position.y == 6 && isColorWhite) || (position.y == 1 && !isColorWhite));
 }
 
 Pawn::~Pawn()
@@ -37,13 +32,13 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     }
 
     // Two moves on firstmove
-    if (firstMove && oneaheadallowed && twoahead.isValidPosition() && _board.getPieceAt(twoahead) == nullptr)
+    if (isFirstMove() && oneaheadallowed && twoahead.isValidPosition() && _board.getPieceAt(twoahead) == nullptr)
     {
         moves.push_back({position, twoahead, MoveType::PawnFirstMove});
     }
 
     // Capture on right
-    Coordinate nextMove = {position.x + direction, position.y + 1};
+    Coordinate nextMove = {position.x + 1, position.y + direction};
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
         moves.push_back({position, nextMove, nextMove.isPromotionSquare(isColorWhite) ? MoveType::Promotion : MoveType::Capture});
@@ -51,7 +46,7 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     }
 
     // Capture on left
-    nextMove = {position.x + direction, position.y - 1};
+    nextMove = {position.x - 1, position.y + direction};
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
     {
         moves.push_back({position, nextMove, nextMove.isPromotionSquare(isColorWhite) ? MoveType::Promotion : MoveType::Capture});
@@ -59,12 +54,12 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     }
 
     // TODO: Generate move for enpassant
-    Coordinate enPassantTarget = _board.getEnpassantTarget();
-    if (enPassantTarget.isValidPosition())
-    {
-        Coordinate enPassantPawn1 = {enPassantTarget.x - direction, enPassantTarget.y + 1};
-        Coordinate enPassantPawn2 = {enPassantTarget.x - direction, enPassantTarget.y - 1};
-    }
+    // Coordinate enPassantTarget = _board.getEnpassantTarget();
+    // if (enPassantTarget.isValidPosition())
+    // {
+    //     Coordinate enPassantPawn1 = {enPassantTarget.x - direction, enPassantTarget.y + 1};
+    //     Coordinate enPassantPawn2 = {enPassantTarget.x - direction, enPassantTarget.y - 1};
+    // }
 
     return moves;
 }
