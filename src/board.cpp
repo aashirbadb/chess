@@ -3,6 +3,28 @@
 #include "headers/utils.h"
 #include <stdlib.h>
 
+bool isCapture(Board *_board, Move _move)
+{
+  Piece *piece = _board->getPieceAt(_move.start);
+  return piece != nullptr && piece->isOpponentPieceAt(_move.end, _board);
+}
+
+bool isPromotion(Board *_board, Move _move)
+{
+  Piece *piece = _board->getPieceAt(_move.start);
+
+  if (toupper(piece->getSymbol()) == 'P')
+  {
+    return _move.end.isPromotionSquare(isupper(piece->getSymbol()));
+  }
+  return false;
+}
+
+bool isCastle(Board *_board, Move _move)
+{
+  return false;
+}
+
 Board::Board()
 {
   fromFEN(STARTING_FEN);
@@ -161,6 +183,7 @@ int Board::fromFEN(std::string fen)
 
   // Other things
   state = GameState::Playing;
+  promotionPiece = nullptr;
 
   return 0;
 }
@@ -362,6 +385,8 @@ void Board::moveUnchecked(Move _move)
 
 void Board::performMove(Move _move)
 {
+  if (isWaitingForPromotion())
+    throw "Waiting to promote piece";
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
 
@@ -387,26 +412,25 @@ void Board::performMove(Move _move)
     if (_move.end.x == moves[i].end.x && _move.end.y == moves[i].end.y)
     {
       isValidMove = true;
-      _move = moves[i]; // _moves may not provide moveType so use moves[i]
       break;
     }
   }
 
   if (isValidMove)
   {
-    if (_move.type == MoveType::KingsideCastle || _move.type == MoveType::QueensideCastle)
+    if (isCastle(this, _move))
     {
       // TODO: handle castling
     }
-    else if ((_move.type == MoveType::Promotion) ||
-             (tolower(startPiece->getSymbol()) == 'p' && _move.end.isPromotionSquare(startPiece->isWhite())))
+    else if (isPromotion(this, _move))
     {
       // Promotion
       // TODO: Allow user to choose promotion piece
-      Piece *promotionPiece = createPiece(_move.end, startPiece->isWhite() ? 'Q' : 'q');
       pieces[_move.start.y][_move.start.x] = nullptr;
-      pieces[_move.end.y][_move.end.x] = promotionPiece;
-      // pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+      pieces[_move.end.y][_move.end.x] = startPiece;
+      pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+
+      promotionPiece = startPiece;
     }
     else
     {
@@ -425,7 +449,7 @@ void Board::performMove(Move _move)
     enPassantTarget = {-1, -1}; // reset enpassant target every turn
 
     // Halfmove clock increments every piece but resets when there is pawn movement or capture
-    if (startPiece->getSymbol() == 'p' || startPiece->getSymbol() == 'P' || _move.type == MoveType::Capture)
+    if (startPiece->getSymbol() == 'p' || startPiece->getSymbol() == 'P' || isCapture(this, _move))
     {
       halfMoveClock = 0;
     }
@@ -563,24 +587,27 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
   return piece_ptr;
 }
 
-bool Board::castlingAvailable(MoveType _type, bool _isWhitePiece)
+bool Board::castlingAvailable(char _type)
 {
-  int offset = _isWhitePiece ? 0 : 2;
-  int pieceOffset = 0;
-  if (_type == MoveType::KingsideCastle)
+  switch (_type)
   {
-    pieceOffset = 0;
-  }
-  else if (_type == MoveType::QueensideCastle)
-  {
-    pieceOffset = 1;
-  }
-  else
-  {
-    throw "Invalid movetype for checking castling availablity";
-  }
+  case 'K':
+    return canCastle[0];
+    break;
+  case 'Q':
+    return canCastle[1];
+    break;
+  case 'k':
+    return canCastle[2];
+    break;
+  case 'q':
+    return canCastle[3];
+    break;
 
-  return canCastle[offset + pieceOffset];
+  default:
+    throw "Wrong castling type";
+    break;
+  }
 }
 
 std::vector<Move> Board::getAllPlayerMoves(bool _white)
@@ -657,4 +684,25 @@ Piece *Board::getBlackKing()
 GameState Board::getGameState()
 {
   return state;
+}
+
+bool Board::isWaitingForPromotion()
+{
+  return promotionPiece != nullptr;
+}
+
+void Board::promoteTo(char _type)
+{
+  if (promotionPiece != nullptr && promotionPiece->isWhite() == isupper(_type))
+  {
+    Coordinate dest = promotionPiece->getPosition();
+    Piece *temp = createPiece(dest, _type);
+    pieces[dest.y][dest.x] = temp;
+    promotionPiece = nullptr;
+  }
+}
+
+Piece *Board::getPromotionPiece()
+{
+  return promotionPiece;
 }

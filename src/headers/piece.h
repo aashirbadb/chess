@@ -24,10 +24,10 @@ public:
     virtual char getSymbol() = 0;
 
     // returns true if there is opponent piece in given coordinate
-    bool isOpponentPieceAt(Coordinate _coord, Board &_board);
+    bool isOpponentPieceAt(Coordinate _coord, Board *_board);
 
     // returns true if there is onw piece in given coordinate
-    bool isOwnPieceAt(Coordinate _coord, Board &_board);
+    bool isOwnPieceAt(Coordinate _coord, Board *_board);
 
     std::vector<Move> getLegalMoves(Board &_board);
 

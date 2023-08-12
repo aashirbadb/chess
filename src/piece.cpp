@@ -23,29 +23,29 @@ bool Piece::isWhite()
     return isColorWhite;
 }
 
-bool Piece::isOpponentPieceAt(Coordinate _coord, Board &_board)
+bool Piece::isOpponentPieceAt(Coordinate _coord, Board *_board)
 {
-    Piece *_piece = _board.getPieceAt(_coord);
+    Piece *_piece = _board->getPieceAt(_coord);
     if (_piece == nullptr)
     {
         return false;
     }
     else
     {
-        return _board.getPieceAt(_coord)->isWhite() == !isColorWhite;
+        return _board->getPieceAt(_coord)->isWhite() == !isColorWhite;
     }
 }
 
-bool Piece::isOwnPieceAt(Coordinate _coord, Board &_board)
+bool Piece::isOwnPieceAt(Coordinate _coord, Board *_board)
 {
-    Piece *_piece = _board.getPieceAt(_coord);
+    Piece *_piece = _board->getPieceAt(_coord);
     if (_piece == nullptr)
     {
         return false;
     }
     else
     {
-        return _board.getPieceAt(_coord)->isWhite() == isColorWhite;
+        return _board->getPieceAt(_coord)->isWhite() == isColorWhite;
     }
 }
 

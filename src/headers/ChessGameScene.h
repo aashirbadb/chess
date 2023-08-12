@@ -7,7 +7,7 @@ class ChessGame : public GameScene
 {
     Board *board;
     Piece *selected_piece;
-    static char rowlabel[9], columnlabel[9];
+    static char rowlabel[9], columnlabel[9], promotionPieces[4];
 
 public:
     ChessGame(Game *g);

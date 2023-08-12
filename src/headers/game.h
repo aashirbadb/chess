@@ -11,7 +11,9 @@
 #include <SDL2/SDL_blendmode.h>
 
 #define SQUARE_SIZE 85
-
+#define BOARD_SIZE SQUARE_SIZE * 8
+#define WINDOW_HEIGHT BOARD_SIZE
+#define WINDOW_WIDTH BOARD_SIZE
 namespace color
 {
     const SDL_Color WHITE = {255, 255, 255, SDL_ALPHA_OPAQUE};
@@ -52,7 +54,4 @@ public:
     void pushScene(GameScene *sc);
     GameScene *popScene();
     GameScene *currentScene();
-
-private:
-    static char rowlabel[9], columnlabel[9]; // remove
 };

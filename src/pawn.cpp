@@ -27,29 +27,29 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     // One move ahead
     if (oneahead.isValidPosition() && _board.getPieceAt(oneahead) == nullptr)
     {
-        moves.push_back({position, oneahead, oneahead.isPromotionSquare(isColorWhite) ? MoveType::Promotion : MoveType::Normal});
+        moves.push_back({position, oneahead});
         oneaheadallowed = true;
     }
 
     // Two moves on firstmove
     if (isFirstMove() && oneaheadallowed && twoahead.isValidPosition() && _board.getPieceAt(twoahead) == nullptr)
     {
-        moves.push_back({position, twoahead, MoveType::PawnFirstMove});
+        moves.push_back({position, twoahead});
     }
 
     // Capture on right
     Coordinate nextMove = {position.x + 1, position.y + direction};
-    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
+    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, &_board))
     {
-        moves.push_back({position, nextMove, nextMove.isPromotionSquare(isColorWhite) ? MoveType::Promotion : MoveType::Capture});
+        moves.push_back({position, nextMove});
         _board.setEnpassantTarget(oneahead);
     }
 
     // Capture on left
     nextMove = {position.x - 1, position.y + direction};
-    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, _board))
+    if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, &_board))
     {
-        moves.push_back({position, nextMove, nextMove.isPromotionSquare(isColorWhite) ? MoveType::Promotion : MoveType::Capture});
+        moves.push_back({position, nextMove});
         _board.setEnpassantTarget(oneahead);
     }
 

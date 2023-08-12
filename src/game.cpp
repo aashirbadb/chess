@@ -1,6 +1,6 @@
 #include <iostream>
 #include "headers/game.h"
-#include "headers/ChessGameScene.h"
+#include "headers/gameMenu.h"
 
 Game::Game()
 {
@@ -9,10 +9,10 @@ Game::Game()
     SDL_Init(SDL_INIT_EVERYTHING);
     TTF_Init();
 
-    window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SQUARE_SIZE * 8, SQUARE_SIZE * 8, 0);
+    window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_HEIGHT, WINDOW_WIDTH, 0);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    scenes.push(new ChessGame(this));
+    scenes.push(new GameMenu(this));
 }
 
 Game::~Game()
@@ -82,12 +82,14 @@ void Game::requestRender()
 void Game::pushScene(GameScene *sc)
 {
     scenes.push(sc);
+    render_requested = true;
 }
 
 GameScene *Game::popScene()
 {
     GameScene *temp = scenes.top();
     scenes.pop();
+    render_requested = true;
     return temp;
 }
 

@@ -16,7 +16,7 @@ Texture::~Texture()
     SDL_DestroyTexture(texture);
 }
 
-void Texture::loadChar(char ch, int fontsize, SDL_Color color)
+TTF_Font *Texture::getFont(int fontsize)
 {
     TTF_Font *font = Texture::FONTS[fontsize];
 
@@ -26,8 +26,28 @@ void Texture::loadChar(char ch, int fontsize, SDL_Color color)
         font = TTF_OpenFont("assets/Roboto.ttf", fontsize);
         FONTS[fontsize] = font;
     }
+    return font;
+}
+
+void Texture::loadChar(char ch, int fontsize, SDL_Color color)
+{
+    TTF_Font *font = getFont(fontsize);
 
     SDL_Surface *text = TTF_RenderGlyph32_Blended(font, ch, color);
+
+    h = text->h;
+    w = text->w;
+
+    texture = SDL_CreateTextureFromSurface(renderer, text);
+
+    SDL_FreeSurface(text);
+}
+
+void Texture::loadString(const char *str, int fontsize, SDL_Color color)
+{
+    TTF_Font *font = getFont(fontsize);
+
+    SDL_Surface *text = TTF_RenderText_Blended(font, str, color);
 
     h = text->h;
     w = text->w;

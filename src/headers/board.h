@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 #include "pawn.h"
 #include "rook.h"
 #include "knight.h"
@@ -30,8 +31,6 @@ class Board
 private:
     std::vector<Piece *> allCreatedPiece;
     GameState state;
-
-protected:
     Piece *pieces[8][8];
     bool isWhiteTurn;
     bool canCastle[4];
@@ -42,6 +41,8 @@ protected:
     int fullMoveClock;
     Piece *whiteKing;
     Piece *blackKing;
+
+    Piece *promotionPiece;
 
 public:
     Board();
@@ -69,7 +70,7 @@ public:
 
     std::vector<Move> getAllPlayerMoves(bool _white);
 
-    bool castlingAvailable(MoveType _type, bool _isWhitePiece);
+    bool castlingAvailable(char _type);
 
     Piece *getPieceAt(Coordinate _coord);
     Coordinate getEnpassantTarget();
@@ -86,4 +87,8 @@ public:
     Piece *getBlackKing();
 
     GameState getGameState();
+
+    bool isWaitingForPromotion();
+    void promoteTo(char _type);
+    Piece *getPromotionPiece();
 };

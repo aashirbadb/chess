@@ -1,12 +1,15 @@
+#include <iostream>
 #include "headers/ChessGameScene.h"
+#include "headers/gameover.h"
 
 char ChessGame::columnlabel[9] = "abcdefgh";
 char ChessGame::rowlabel[9] = "12345678";
+char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'K'};
 
 ChessGame::ChessGame(Game *g) : GameScene(g)
 {
     game = g;
-    board = new Board();
+    board = new Board(SOME_FEN);
     selected_piece = nullptr;
 }
 
@@ -81,12 +84,12 @@ void ChessGame::render()
     {
         Texture coltexture(game->getRenderer());
         coltexture.loadChar(columnlabel[i], SQUARE_SIZE / 5, color::BLUE);
-        SDL_Rect colrect = {i * SQUARE_SIZE, 8 * SQUARE_SIZE - coltexture.getHeight(), coltexture.getWidth(), coltexture.getHeight()};
+        SDL_Rect colrect = {i * SQUARE_SIZE, BOARD_SIZE - coltexture.getHeight(), coltexture.getWidth(), coltexture.getHeight()};
         coltexture.draw(NULL, &colrect);
 
         Texture rowtexture(game->getRenderer());
         rowtexture.loadChar(rowlabel[7 - i], SQUARE_SIZE / 5, color::BLUE);
-        SDL_Rect rowrect = {8 * SQUARE_SIZE - rowtexture.getWidth(), i * SQUARE_SIZE, rowtexture.getWidth(), rowtexture.getHeight()};
+        SDL_Rect rowrect = {BOARD_SIZE - rowtexture.getWidth(), i * SQUARE_SIZE, rowtexture.getWidth(), rowtexture.getHeight()};
         rowtexture.draw(NULL, &rowrect);
     }
 
@@ -112,57 +115,91 @@ void ChessGame::render()
             }
         }
     }
-}
 
-#include "headers/gameMenu.h"
+    // Show promotion menu
+    if (board->isWaitingForPromotion())
+    {
+        bool whitePromotion = board->getPromotionPiece()->isWhite();
+        for (int i = 0; i < 4; i++)
+        {
+            SDL_Rect rect = {BOARD_SIZE / 2 - (2 - i) * SQUARE_SIZE, BOARD_SIZE / 2 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE};
+            SDL_Color rect_bg;
+            if (i % 2 == 0)
+                rect_bg = color::GREEN;
+            else
+                rect_bg = color::BLUE;
+
+            SDL_SetRenderDrawColor(game->getRenderer(), rect_bg.r, rect_bg.g, rect_bg.b, rect_bg.a);
+
+            SDL_RenderFillRect(game->getRenderer(), &rect);
+
+            Texture text(game->getRenderer());
+            text.loadChar(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]), SQUARE_SIZE, color::BLACK);
+            text.draw(NULL, &rect);
+        }
+    }
+}
 
 void ChessGame::handleEvent(SDL_Event &e)
 {
     if (e.type == SDL_MOUSEBUTTONDOWN)
     {
-
         int x, y;
         SDL_GetMouseState(&x, &y);
-        x /= SQUARE_SIZE;
-        y /= SQUARE_SIZE;
-        Coordinate selected_coord{x, y};
-        Piece *piece = board->getPieceAt(selected_coord);
 
-        if (selected_piece != nullptr)
+        if (board->isWaitingForPromotion())
         {
-            std::vector<Move> moves = selected_piece->getLegalMoves(*board);
-
-            for (int i = 0; i < moves.size(); i++)
+            bool whitePromotion = board->getPromotionPiece()->isWhite();
+            for (int i = 0; i < 4; i++)
             {
-                if (moves[i].end == selected_coord)
+                SDL_Rect rect = {BOARD_SIZE / 2 - (2 - i) * SQUARE_SIZE, BOARD_SIZE / 2 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE};
+                if (hasClickedInsideButton(x, y, rect))
                 {
-                    board->performMove(moves[i]);
-                    selected_piece = nullptr;
+                    board->promoteTo(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]));
                     game->requestRender();
-                    return;
                 }
             }
         }
-        if (piece != nullptr && piece == selected_piece)
-        {
-            selected_piece = nullptr;
-        }
-        else if (piece != nullptr && board->getIsWhiteTurn() == piece->isWhite())
-        {
-            selected_piece = piece;
-        }
         else
         {
-            selected_piece = nullptr;
+            Coordinate selected_coord{x / SQUARE_SIZE, y / SQUARE_SIZE};
+            Piece *piece = board->getPieceAt(selected_coord);
+
+            if (selected_piece != nullptr)
+            {
+                std::vector<Move> moves = selected_piece->getLegalMoves(*board);
+
+                for (int i = 0; i < moves.size(); i++)
+                {
+                    if (moves[i].end == selected_coord)
+                    {
+                        board->performMove(moves[i]);
+                        selected_piece = nullptr;
+                        game->requestRender();
+                        return;
+                    }
+                }
+            }
+            if (piece != nullptr && piece == selected_piece)
+            {
+                selected_piece = nullptr;
+            }
+            else if (piece != nullptr && board->getIsWhiteTurn() == piece->isWhite())
+            {
+                selected_piece = piece;
+            }
+            else
+            {
+                selected_piece = nullptr;
+            }
         }
 
-        GameState state = board->getGameState();
-        // TODO: Currently game just stops if the game ends
-        if (
-            (state == GameState::WhiteWins) || (state == GameState::BlackWins) || (state == GameState::Stalemate) || (state == GameState::Draw))
-        {
-            game->pushScene(new GameMenu(game));
-        }
         game->requestRender();
+    }
+
+    GameState state = board->getGameState();
+    if (state != GameState::Playing)
+    {
+        game->pushScene(new GameOver(game, state));
     }
 }

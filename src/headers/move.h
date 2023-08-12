@@ -2,21 +2,9 @@
 #include "coordinate.h"
 #include <iostream>
 
-enum class MoveType
-{
-    Normal,
-    Capture,
-    Promotion,
-    PawnFirstMove,
-    Enpassant,
-    KingsideCastle,
-    QueensideCastle
-};
-
 struct Move
 {
     Coordinate start, end;
-    MoveType type;
 };
 
 inline std::ostream &operator<<(std::ostream &o, Move &m)

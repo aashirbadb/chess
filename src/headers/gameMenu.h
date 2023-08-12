@@ -3,6 +3,8 @@
 
 class GameMenu : public GameScene
 {
+    SDL_Rect startbutton;
+
 public:
     GameMenu(Game *g);
 

@@ -20,7 +20,10 @@ public:
     int getHeight() { return h; }
     int getWidth() { return w; }
 
+    TTF_Font *getFont(int fontsize);
+
     void loadChar(char ch, int fontsize, SDL_Color color);
+    void loadString(const char *str, int fontsize, SDL_Color color);
 
     void draw(SDL_Rect *src, SDL_Rect *dest);
 

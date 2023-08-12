@@ -24,13 +24,13 @@ std::vector<Move> King::getAllMoves(Board &_board)
         Coordinate next_position = {position.x + KING_MOVE_DIRECTIONS[i].x, position.y + KING_MOVE_DIRECTIONS[i].y};
         if (next_position.isValidPosition())
         {
-            if (isOpponentPieceAt(next_position, _board))
+            if (isOpponentPieceAt(next_position, &_board))
             {
-                moves.push_back(Move{position, next_position, MoveType::Capture});
+                moves.push_back(Move{position, next_position});
             }
             else if (_board.getPieceAt(next_position) == nullptr)
             {
-                moves.push_back(Move{position, next_position, MoveType::Normal});
+                moves.push_back(Move{position, next_position});
             }
         }
     }
