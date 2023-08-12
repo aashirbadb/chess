@@ -22,7 +22,7 @@ TTF_Font *Texture::getFont(int fontsize)
 
     if (font == nullptr)
     {
-        std::cout << "Font of size " << fontsize << " not found. Opening new one." << std::endl;
+        std::cerr << "Font of size " << fontsize << " not found. Creating new one." << std::endl;
         font = TTF_OpenFont("assets/Roboto.ttf", fontsize);
         FONTS[fontsize] = font;
     }
@@ -66,7 +66,7 @@ void Texture::clearTextures()
 {
     for (auto &it : Texture::FONTS)
     {
-        // std::cout <<it.first <<std::endl;
+        // std::cerr <<it.first <<std::endl;
         // TTF_CloseFont(it.second); //This causes segfault🤷🤷
     }
 }

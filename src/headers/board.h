@@ -15,7 +15,8 @@ class Piece;
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
 const std::string STARTING_FEN = std::string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-const std::string SOME_FEN = std::string("rnbqkbnr/pp2pppp/8/2p5/4P3/5N2/PPPp1PPP/RNBQKB1R w KQkq - 1 2");
+// const std::string SOME_FEN = std::string("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR w KQkq d5 0 1");
+const std::string SOME_FEN = std::string("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
 
 enum class GameState
 {
@@ -74,7 +75,6 @@ public:
 
     Piece *getPieceAt(Coordinate _coord);
     Coordinate getEnpassantTarget();
-    void setEnpassantTarget(Coordinate _coord);
 
     void moveUnchecked(Move _move);
     void performMove(Move _move);

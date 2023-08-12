@@ -42,7 +42,6 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, &_board))
     {
         moves.push_back({position, nextMove});
-        _board.setEnpassantTarget(oneahead);
     }
 
     // Capture on left
@@ -50,16 +49,28 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     if (nextMove.isValidPosition() && isOpponentPieceAt(nextMove, &_board))
     {
         moves.push_back({position, nextMove});
-        _board.setEnpassantTarget(oneahead);
     }
 
     // TODO: Generate move for enpassant
-    // Coordinate enPassantTarget = _board.getEnpassantTarget();
-    // if (enPassantTarget.isValidPosition())
-    // {
-    //     Coordinate enPassantPawn1 = {enPassantTarget.x - direction, enPassantTarget.y + 1};
-    //     Coordinate enPassantPawn2 = {enPassantTarget.x - direction, enPassantTarget.y - 1};
-    // }
+    Coordinate enPassantTarget = _board.getEnpassantTarget();
+    if (enPassantTarget.isValidPosition())
+    {
+        Coordinate pawnpos1 = {enPassantTarget.x + 1, enPassantTarget.y -direction};
+        Coordinate pawnpos2 = {enPassantTarget.x - 1, enPassantTarget.y -direction};
+
+        Piece *enPassantPawn1 = _board.getPieceAt(pawnpos1);
+        Piece *enPassantPawn2 = _board.getPieceAt(pawnpos2);
+
+        if (enPassantPawn1 != nullptr && enPassantPawn1->isWhite() == _board.getIsWhiteTurn())
+        {
+            moves.push_back({enPassantPawn1->getPosition(), enPassantTarget});
+        }
+
+        if (enPassantPawn2 != nullptr && enPassantPawn2->isWhite() == _board.getIsWhiteTurn())
+        {
+            moves.push_back({enPassantPawn2->getPosition(), enPassantTarget});
+        }
+    }
 
     return moves;
 }

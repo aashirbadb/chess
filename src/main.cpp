@@ -16,18 +16,18 @@ void show_valid_positions_at(Coordinate coord, Board &board)
     if (valid.size() > 0)
     {
 
-        std::cout << "Showing all valid moves for " << piece->getSymbol() << " at " << piece->getPosition().getChessCoordinate() << std::endl;
+        std::cerr << "Showing all valid moves for " << piece->getSymbol() << " at " << piece->getPosition().getChessCoordinate() << std::endl;
         for (int i = 0; i < valid.size(); i++)
         {
-            std::cout << valid[i] << '\t';
+            std::cerr << valid[i] << '\t';
         }
-        std::cout << '\n';
+        std::cerr << '\n';
     }
     else
     {
-        std::cout << "No valid positions for " << piece->getSymbol() << " at " << piece->getPosition().getChessCoordinate() << std::endl;
+        std::cerr << "No valid positions for " << piece->getSymbol() << " at " << piece->getPosition().getChessCoordinate() << std::endl;
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 int main(int argc, char **argv)

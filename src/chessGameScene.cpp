@@ -9,7 +9,7 @@ char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'K'};
 ChessGame::ChessGame(Game *g) : GameScene(g)
 {
     game = g;
-    board = new Board(SOME_FEN);
+    board = new Board();
     selected_piece = nullptr;
 }
 
