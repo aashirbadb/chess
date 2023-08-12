@@ -15,7 +15,7 @@ class Piece;
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
 const std::string STARTING_FEN = std::string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-const std::string SOME_FEN = std::string("rnbqkbnr/ppppppPp/8/8/8/8/PP1PPPPP/RNBQKBNR w KQkq - 0 1");
+const std::string SOME_FEN = std::string("rnb1kbnr/pppppppp/8/3q4/8/8/P3PPPP/R3KBNR w KQkq - 0 1");
 
 enum class GameState
 {
@@ -69,6 +69,7 @@ public:
     bool isPlayerInCheck();
 
     std::vector<Move> getAllPlayerMoves(bool _white);
+    std::vector<Move> getAllPlayerLegalMoves(bool _white);
 
     bool castlingAvailable(char _type);
 

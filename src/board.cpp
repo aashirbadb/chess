@@ -2,48 +2,7 @@
 #include <iomanip>
 #include <stdlib.h>
 #include "headers/errors.h"
-
-// C++'s isupper function returns values greater than zero🤷🤷
-// We need bool value
-inline bool isUppercase(char ch)
-{
-  return (ch > 'A' && ch < 'Z');
-}
-
-bool isCapture(Board *_board, Move _move)
-{
-  Piece *piece = _board->getPieceAt(_move.start);
-  return piece != nullptr && piece->isOpponentPieceAt(_move.end, _board);
-}
-
-bool isPromotion(Board *_board, Move _move)
-{
-  Piece *piece = _board->getPieceAt(_move.start);
-
-  if (toupper(piece->getSymbol()) == 'P')
-  {
-    return _move.end.isPromotionSquare(isUppercase(piece->getSymbol()));
-  }
-  return false;
-}
-
-bool isCastle(Board *_board, Move _move)
-{
-  return false;
-}
-
-bool isPawnTwoMovesAhead(Board *_board, Move _move)
-{
-  Piece *piece = _board->getPieceAt(_move.start);
-
-  return ((piece != nullptr) && (tolower(piece->getSymbol()) == 'p') && (abs(_move.end.y - _move.start.y) == 2));
-}
-
-bool isEnpassant(Board *_board, Move _move)
-{
-  Piece *piece = _board->getPieceAt(_move.start);
-  return (piece != nullptr && tolower(piece->getSymbol()) == 'p' && _move.end == _board->getEnpassantTarget());
-}
+#include "headers/utils.h"
 
 Board::Board()
 {
@@ -206,6 +165,7 @@ int Board::fromFEN(std::string fen)
   fullMoveClock = atoi(buf2);
 
   cerr << "Successfully parsed FEN" << endl;
+  display_meta();
 
   // Other things
   state = GameState::Playing;
@@ -397,10 +357,57 @@ void Board::moveUnchecked(Move _move)
     throw Error(ErrorCode::NoStartPiece);
   }
 
-  // Move directly
-  pieces[_move.start.y][_move.start.x] = nullptr;
-  pieces[_move.end.y][_move.end.x] = startPiece;
-  pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+  if (isEnpassant(this, _move))
+  {
+    pieces[_move.start.y][_move.end.x] = nullptr; // capture opponent piece
+  }
+
+  bool kingsidec = isKingSideCastle(this, _move);
+  bool queensidec = isQueenSideCastle(this, _move);
+
+  if (kingsidec != 0 || queensidec != 0) // Handles casting
+  {
+    int tempy = isWhiteTurn ? 7 : 0;
+    Piece *king = getPieceAt({4, tempy});
+    if (king == nullptr)
+      throw Error("Attempting to perform castle when king is not in starting position");
+
+    if (kingsidec == 1)
+    {
+      Piece *rook = getPieceAt({7, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
+
+      pieces[tempy][4] = nullptr; // remove king
+      pieces[tempy][7] = nullptr; // remove rook
+      pieces[tempy][5] = rook;    // place rook
+      pieces[tempy][6] = king;    // place king
+      rook->updateCoordinate({5, tempy});
+      king->updateCoordinate({6, tempy});
+    }
+
+    if (queensidec == 1)
+    {
+      Piece *rook = getPieceAt({0, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
+
+      pieces[tempy][0] = nullptr; // remove rook
+      pieces[tempy][2] = king;    // place king
+      pieces[tempy][3] = rook;    // place rook
+      pieces[tempy][4] = nullptr; // remove king
+      rook->updateCoordinate({3, tempy});
+      king->updateCoordinate({2, tempy});
+    }
+  }
+  else
+  {
+
+    // Move directly
+    pieces[_move.start.y][_move.start.x] = nullptr;
+    pieces[_move.end.y][_move.end.x] = startPiece;
+    pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+  }
 }
 
 void Board::performMove(Move _move)
@@ -445,11 +452,51 @@ void Board::performMove(Move _move)
   // Store if pawn has moved two pieces
   // Used after move has been performed to set enpassant target square
   bool pawntwomoves = isPawnTwoMovesAhead(this, _move);
+  bool kingsidec = isKingSideCastle(this, _move);
+  bool queensidec = isQueenSideCastle(this, _move);
 
   // Move the pieces
-  if (isCastle(this, _move)) // Handles casting
+  if (kingsidec != 0 || queensidec != 0) // Handles casting
   {
-    // TODO: handle castling
+    int tempy = isWhiteTurn ? 7 : 0;
+    Piece *king = getPieceAt({4, tempy});
+    if (king == nullptr)
+      throw Error("Attempting to perform castle when king is not in starting position");
+
+    if (kingsidec == 1)
+    {
+      Piece *rook = getPieceAt({7, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
+
+      pieces[tempy][4] = nullptr; // remove king
+      pieces[tempy][7] = nullptr; // remove rook
+      pieces[tempy][5] = rook;    // place rook
+      pieces[tempy][6] = king;    // place king
+      rook->updateCoordinate({5, tempy});
+      king->updateCoordinate({6, tempy});
+    }
+
+    if (queensidec == 1)
+    {
+      Piece *rook = getPieceAt({0, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
+
+      pieces[tempy][0] = nullptr; // remove rook
+      pieces[tempy][2] = king;    // place king
+      pieces[tempy][3] = rook;    // place rook
+      pieces[tempy][4] = nullptr; // remove king
+      rook->updateCoordinate({3, tempy});
+      king->updateCoordinate({2, tempy});
+    }
+
+    if (kingsidec == 1 || queensidec == 1)
+    {
+      int offset = isWhiteTurn ? 0 : 2;
+      canCastle[offset] = false;
+      canCastle[offset+1] = false;
+    }
   }
   else if (isEnpassant(this, _move))
   {
@@ -542,7 +589,7 @@ void Board::performMove(Move _move)
   isWhiteTurn = !isWhiteTurn; // Change to opposite player's turn
 
   // Check for stalemates and checkmates
-  std::vector<Move> allMoves = getAllPlayerMoves(isWhiteTurn);
+  std::vector<Move> allMoves = getAllPlayerLegalMoves(isWhiteTurn);
   if (allMoves.size() == 0 && isPlayerInCheck())
   {
     state = isWhiteTurn ? GameState::BlackWins : GameState::WhiteWins;
@@ -639,6 +686,23 @@ bool Board::castlingAvailable(char _type)
 }
 
 std::vector<Move> Board::getAllPlayerMoves(bool _white)
+{
+  std::vector<Piece *> allpieces = _white ? getWhitePieces() : getBlackPieces();
+  std::vector<Move> allMoves;
+
+  for (int i = 0; i < allpieces.size(); i++)
+  {
+    std::vector<Move> movesForPiece = allpieces[i]->getAllMoves(*this);
+    for (int j = 0; j < movesForPiece.size(); j++)
+    {
+      allMoves.push_back(movesForPiece[j]);
+    }
+  }
+
+  return allMoves;
+}
+
+std::vector<Move> Board::getAllPlayerLegalMoves(bool _white)
 {
   std::vector<Piece *> allpieces = _white ? getWhitePieces() : getBlackPieces();
   std::vector<Move> allMoves;

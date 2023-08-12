@@ -56,19 +56,24 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     if (enPassantTarget.isValidPosition())
     {
         Coordinate pawnpos1 = {enPassantTarget.x + 1, enPassantTarget.y - direction};
-        Coordinate pawnpos2 = {enPassantTarget.x - 1, enPassantTarget.y - direction};
-
-        Piece *enPassantPawn1 = _board.getPieceAt(pawnpos1);
-        Piece *enPassantPawn2 = _board.getPieceAt(pawnpos2);
-
-        if (enPassantPawn1 != nullptr && enPassantPawn1->isWhite() == _board.getIsWhiteTurn())
+        if (pawnpos1.isValidPosition())
         {
-            moves.push_back({enPassantPawn1->getPosition(), enPassantTarget});
+            Piece *enPassantPawn1 = _board.getPieceAt(pawnpos1);
+
+            if (enPassantPawn1 != nullptr && enPassantPawn1->isWhite() == _board.getIsWhiteTurn())
+            {
+                moves.push_back({enPassantPawn1->getPosition(), enPassantTarget});
+            }
         }
 
-        if (enPassantPawn2 != nullptr && enPassantPawn2->isWhite() == _board.getIsWhiteTurn())
+        Coordinate pawnpos2 = {enPassantTarget.x - 1, enPassantTarget.y - direction};
+        if (pawnpos2.isValidPosition())
         {
-            moves.push_back({enPassantPawn2->getPosition(), enPassantTarget});
+            Piece *enPassantPawn2 = _board.getPieceAt(pawnpos2);
+            if (enPassantPawn2 != nullptr && enPassantPawn2->isWhite() == _board.getIsWhiteTurn())
+            {
+                moves.push_back({enPassantPawn2->getPosition(), enPassantTarget});
+            }
         }
     }
 

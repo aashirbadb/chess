@@ -68,3 +68,8 @@ inline bool operator==(Coordinate a, Coordinate b)
 {
     return (a.x == b.x && a.y == b.y);
 }
+
+inline bool operator!=(Coordinate a, Coordinate b)
+{
+    return !(a == b);
+}

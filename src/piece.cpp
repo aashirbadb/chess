@@ -1,7 +1,7 @@
 
 #include "headers/piece.h"
 #include <iostream>
-#include "headers/board.h"
+#include "headers/utils.h"
 
 Piece::Piece(Coordinate _pos, bool _isWhite)
 {
@@ -59,12 +59,17 @@ std::vector<Move> Piece::getLegalMoves(Board &_board)
     {
         Board nextMoveBoardPosition(_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
-        if (!nextMoveBoardPosition.isPlayerInCheck())
+
+        int queensc = isQueenSideCastle(&_board, allMoves[i]);
+        int kingsc = isKingSideCastle(&_board, allMoves[i]);
+
+        if (!nextMoveBoardPosition.isPlayerInCheck() && queensc != -1 && kingsc != -1)
         {
             legalMoves.push_back(allMoves[i]);
         }
     }
 
+    allMoves.clear();
     return legalMoves;
 }
 

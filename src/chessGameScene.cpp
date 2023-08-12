@@ -9,7 +9,7 @@ char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'K'};
 ChessGame::ChessGame(Game *g) : GameScene(g)
 {
     game = g;
-    board = new Board(SOME_FEN);
+    board = new Board();
     selected_piece = nullptr;
 }
 
@@ -20,6 +20,7 @@ ChessGame::~ChessGame()
 
 void ChessGame::render()
 {
+
     // Draw board tiles
     for (int y = 0; y < 8; y++)
     {
@@ -149,14 +150,14 @@ void ChessGame::handleEvent(SDL_Event &e)
 
         if (board->isWaitingForPromotion())
         {
-            std::cout << "waiting for promotion" <<std::endl;
+            std::cout << "waiting for promotion" << std::endl;
             bool whitePromotion = board->getPromotionPiece()->isWhite();
             for (int i = 0; i < 4; i++)
             {
                 SDL_Rect rect = {BOARD_SIZE / 2 - (2 - i) * SQUARE_SIZE, BOARD_SIZE / 2 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE};
                 if (hasClickedInsideButton(x, y, rect))
                 {
-                    std::cout << "Clicked "<<i <<std::endl;
+                    std::cout << "Clicked " << i << std::endl;
                     board->promoteTo(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]));
                     game->requestRender();
                     break;

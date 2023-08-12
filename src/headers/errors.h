@@ -61,6 +61,7 @@ public:
         case ErrorCode::Message:
             return error.c_str();
         default:
+            return "Unknown error";
             break;
         }
     }

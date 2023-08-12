@@ -40,7 +40,31 @@ std::vector<Move> King::getAllMoves(Board &_board)
     // - The king is not in check
     // - The rook/king should not have moved
     // - Any path from king to rook should not be attacked by any piece
-    // std::vector<Move> opponentAllMoves = _board.getAllPlayerMoves(!isColorWhite);
+    int tempy = isColorWhite ? 7 : 0;
+    if (_board.castlingAvailable(isColorWhite ? 'K' : 'k'))
+    {
+        Piece *a = _board.getPieceAt({5, tempy});
+        Piece *b = _board.getPieceAt({6, tempy});
+
+        if (a == nullptr && b == nullptr)
+        {
+            moves.push_back({{4, tempy}, {6, tempy}}); // not touching rook
+            moves.push_back({{4, tempy}, {7, tempy}}); // touching rook
+        }
+    }
+
+    if (_board.castlingAvailable(isColorWhite ? 'Q' : 'q'))
+    {
+        Piece *a = _board.getPieceAt({1, tempy});
+        Piece *b = _board.getPieceAt({2, tempy});
+        Piece *c = _board.getPieceAt({3, tempy});
+
+        if (a == nullptr && b == nullptr && c == nullptr)
+        {
+            moves.push_back({{4, tempy}, {2, tempy}}); // not touching rook
+            moves.push_back({{4, tempy}, {0, tempy}}); // touching rook
+        }
+    }
 
     return moves;
 }
