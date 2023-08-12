@@ -3,6 +3,13 @@
 #include <stdlib.h>
 #include "headers/errors.h"
 
+// C++'s isupper function returns values greater than zero🤷🤷
+// We need bool value
+inline bool isUppercase(char ch)
+{
+  return (ch > 'A' && ch < 'Z');
+}
+
 bool isCapture(Board *_board, Move _move)
 {
   Piece *piece = _board->getPieceAt(_move.start);
@@ -15,7 +22,7 @@ bool isPromotion(Board *_board, Move _move)
 
   if (toupper(piece->getSymbol()) == 'P')
   {
-    return _move.end.isPromotionSquare(isupper(piece->getSymbol()));
+    return _move.end.isPromotionSquare(isUppercase(piece->getSymbol()));
   }
   return false;
 }
@@ -558,33 +565,33 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
   {
   case 'p':
   case 'P':
-    piece_ptr = new Pawn({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Pawn({_pos.x, _pos.y}, isUppercase(piece));
     break;
 
   case 'r':
   case 'R':
-    piece_ptr = new Rook({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Rook({_pos.x, _pos.y}, isUppercase(piece));
     break;
 
   case 'n':
   case 'N':
-    piece_ptr = new Knight({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Knight({_pos.x, _pos.y}, isUppercase(piece));
     break;
 
   case 'b':
   case 'B':
-    piece_ptr = new Bishop({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Bishop({_pos.x, _pos.y}, isUppercase(piece));
     break;
 
   case 'q':
   case 'Q':
-    piece_ptr = new Queen({_pos.x, _pos.y}, isupper(piece));
+    piece_ptr = new Queen({_pos.x, _pos.y}, isUppercase(piece));
     break;
 
   case 'k':
   case 'K':
-    piece_ptr = new King({_pos.x, _pos.y}, isupper(piece));
-    if (isupper(piece))
+    piece_ptr = new King({_pos.x, _pos.y}, isUppercase(piece));
+    if (isUppercase(piece))
     {
       if (whiteKing == nullptr)
         whiteKing = piece_ptr;
@@ -714,7 +721,12 @@ bool Board::isWaitingForPromotion()
 
 void Board::promoteTo(char _type)
 {
-  if (promotionPiece != nullptr && promotionPiece->isWhite() == isupper(_type))
+  if (promotionPiece != nullptr)
+  {
+    std::cout << promotionPiece->getSymbol() << promotionPiece->isWhite() << _type << isUppercase(_type) << std::endl;
+  }
+
+  if ((promotionPiece != nullptr) && (promotionPiece->isWhite() == isUppercase(_type)))
   {
     Coordinate dest = promotionPiece->getPosition();
     Piece *temp = createPiece(dest, _type);

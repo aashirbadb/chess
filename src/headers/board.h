@@ -15,8 +15,7 @@ class Piece;
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
 const std::string STARTING_FEN = std::string("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-// const std::string SOME_FEN = std::string("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR w KQkq d5 0 1");
-const std::string SOME_FEN = std::string("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1");
+const std::string SOME_FEN = std::string("rnbqkbnr/ppppppPp/8/8/8/8/PP1PPPPP/RNBQKBNR w KQkq - 0 1");
 
 enum class GameState
 {

@@ -55,8 +55,8 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
     Coordinate enPassantTarget = _board.getEnpassantTarget();
     if (enPassantTarget.isValidPosition())
     {
-        Coordinate pawnpos1 = {enPassantTarget.x + 1, enPassantTarget.y -direction};
-        Coordinate pawnpos2 = {enPassantTarget.x - 1, enPassantTarget.y -direction};
+        Coordinate pawnpos1 = {enPassantTarget.x + 1, enPassantTarget.y - direction};
+        Coordinate pawnpos2 = {enPassantTarget.x - 1, enPassantTarget.y - direction};
 
         Piece *enPassantPawn1 = _board.getPieceAt(pawnpos1);
         Piece *enPassantPawn2 = _board.getPieceAt(pawnpos2);
