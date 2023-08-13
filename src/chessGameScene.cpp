@@ -20,28 +20,13 @@ ChessGame::~ChessGame()
 
 void ChessGame::render()
 {
-
     // Draw board tiles
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
-            SDL_Color tilecolor;
-            if (board->getBoardColorAt(x, y))
-            {
-                tilecolor = color::WHITE;
-            }
-            else
-            {
-                tilecolor = color::BLACK;
-            }
-
-            SDL_Rect rect = {x * SQUARE_SIZE,
-                             y * SQUARE_SIZE,
-                             SQUARE_SIZE,
-                             SQUARE_SIZE};
-            SDL_SetRenderDrawColor(game->getRenderer(), tilecolor.r, tilecolor.g, tilecolor.b, tilecolor.a);
-            SDL_RenderFillRect(game->getRenderer(), &rect);
+            SDL_Color tilecolor = board->getBoardColorAt(x, y) ? color::WHITE_TILE : color::BLACK_TILE;
+            renderTile(x, y, tilecolor);
         }
     }
 
@@ -49,48 +34,50 @@ void ChessGame::render()
     if (board->isWhiteInCheck())
     {
         Coordinate pos = board->getWhiteKing()->getPosition();
-        SDL_Rect rect = {pos.x * SQUARE_SIZE, pos.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
-        SDL_SetRenderDrawColor(game->getRenderer(), 128, 0, 0, 200);
-        SDL_RenderFillRect(game->getRenderer(), &rect);
+        renderTile(pos, color::CHECK_TILE);
     }
 
     if (board->isBlackInCheck())
     {
         Coordinate pos = board->getBlackKing()->getPosition();
-        SDL_Rect rect = {pos.x * SQUARE_SIZE, pos.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
-        SDL_SetRenderDrawColor(game->getRenderer(), 128, 0, 0, 200);
-        SDL_RenderFillRect(game->getRenderer(), &rect);
+        renderTile(pos, color::CHECK_TILE);
     }
 
     // Highlight selected piece(tile) and show valid moves
     if (selected_piece != nullptr)
     {
         Coordinate pos = selected_piece->getPosition();
-        SDL_Rect rect = {pos.x * SQUARE_SIZE, pos.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
-        SDL_SetRenderDrawColor(game->getRenderer(), 0, 255, 0, 128);
-        SDL_RenderFillRect(game->getRenderer(), &rect);
-
+        renderTile(pos, color::SELECTED_TILE);
         std::vector<Move> moves = selected_piece->getLegalMoves(*board);
 
         for (int i = 0; i < moves.size(); i++)
         {
-            SDL_Rect rect = {moves[i].end.x * SQUARE_SIZE, moves[i].end.y * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE};
-            SDL_SetRenderDrawColor(game->getRenderer(), 0, 255, 0, 64);
-            SDL_RenderFillRect(game->getRenderer(), &rect);
+            renderTile(moves[i].end, color::MOVE_TILE);
         }
     }
 
+    WindowSize wsize = game->getWindowSize();
     // Render coordinate text
     for (int i = 0; i < 8; i++)
     {
         Texture coltexture(game->getRenderer());
-        coltexture.loadChar(columnlabel[i], SQUARE_SIZE / 5, color::BLUE);
-        SDL_Rect colrect = {i * SQUARE_SIZE, BOARD_SIZE - coltexture.getHeight(), coltexture.getWidth(), coltexture.getHeight()};
+        coltexture.loadChar(columnlabel[i], wsize.tileSize / 5, color::BLUE);
+        SDL_Rect colrect = {
+            i * wsize.tileSize + wsize.leftOffset + 2,
+            wsize.boardSize + wsize.topOffset - coltexture.getHeight(),
+            coltexture.getWidth(),
+            coltexture.getHeight(),
+        };
         coltexture.draw(NULL, &colrect);
 
         Texture rowtexture(game->getRenderer());
-        rowtexture.loadChar(rowlabel[7 - i], SQUARE_SIZE / 5, color::BLUE);
-        SDL_Rect rowrect = {BOARD_SIZE - rowtexture.getWidth(), i * SQUARE_SIZE, rowtexture.getWidth(), rowtexture.getHeight()};
+        rowtexture.loadChar(rowlabel[7 - i], wsize.tileSize / 5, color::BLUE);
+        SDL_Rect rowrect = {
+            wsize.boardSize - rowtexture.getWidth() + wsize.leftOffset - 2,
+            i * wsize.tileSize + wsize.topOffset + 2,
+            rowtexture.getWidth(),
+            rowtexture.getHeight(),
+        };
         rowtexture.draw(NULL, &rowrect);
     }
 
@@ -99,20 +86,9 @@ void ChessGame::render()
     {
         for (int x = 0; x < 8; x++)
         {
-            SDL_Rect rect =
-                {
-                    x * SQUARE_SIZE,
-                    y * SQUARE_SIZE,
-                    SQUARE_SIZE,
-                    SQUARE_SIZE,
-                };
             if (board->getPieceAt({x, y}) != nullptr)
             {
-                // TODO: add piece textures
-                Texture font(game->getRenderer());
-                font.loadChar(board->getPieceAt({x, y})->getSymbol(), SQUARE_SIZE, color::RED);
-                SDL_Rect dest = {rect.x + (SQUARE_SIZE - font.getWidth()) / 2, rect.y + (SQUARE_SIZE - font.getHeight()) / 2, font.getWidth(), font.getHeight()};
-                font.draw(NULL, &dest);
+                renderPiece(board->getPieceAt({x, y}));
             }
         }
     }
@@ -123,7 +99,7 @@ void ChessGame::render()
         bool whitePromotion = board->getPromotionPiece()->isWhite();
         for (int i = 0; i < 4; i++)
         {
-            SDL_Rect rect = {BOARD_SIZE / 2 - (2 - i) * SQUARE_SIZE, BOARD_SIZE / 2 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE};
+            SDL_Rect rect = {wsize.boardSize / 2 - (2 - i) * wsize.tileSize + wsize.leftOffset, wsize.boardSize / 2 - wsize.tileSize / 2, wsize.tileSize, wsize.tileSize};
             SDL_Color rect_bg;
             if (i % 2 == 0)
                 rect_bg = color::GREEN;
@@ -135,7 +111,7 @@ void ChessGame::render()
             SDL_RenderFillRect(game->getRenderer(), &rect);
 
             Texture text(game->getRenderer());
-            text.loadChar(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]), SQUARE_SIZE, color::BLACK);
+            text.loadChar(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]), wsize.tileSize, color::BLACK);
             text.draw(NULL, &rect);
         }
     }
@@ -143,6 +119,7 @@ void ChessGame::render()
 
 void ChessGame::handleEvent(SDL_Event &e)
 {
+    WindowSize wsize = game->getWindowSize();
     if (e.type == SDL_MOUSEBUTTONDOWN)
     {
         int x, y;
@@ -150,15 +127,14 @@ void ChessGame::handleEvent(SDL_Event &e)
 
         if (board->isWaitingForPromotion())
         {
-            std::cout << "waiting for promotion" << std::endl;
             bool whitePromotion = board->getPromotionPiece()->isWhite();
             for (int i = 0; i < 4; i++)
             {
-                SDL_Rect rect = {BOARD_SIZE / 2 - (2 - i) * SQUARE_SIZE, BOARD_SIZE / 2 - SQUARE_SIZE / 2, SQUARE_SIZE, SQUARE_SIZE};
+                SDL_Rect rect = {wsize.boardSize / 2 - (2 - i) * wsize.tileSize + wsize.leftOffset, wsize.boardSize / 2 - wsize.tileSize / 2, wsize.tileSize, wsize.tileSize};
                 if (hasClickedInsideButton(x, y, rect))
                 {
-                    std::cout << "Clicked " << i << std::endl;
                     board->promoteTo(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]));
+                    game->playSound(Sound::Promote);
                     game->requestRender();
                     break;
                 }
@@ -166,7 +142,7 @@ void ChessGame::handleEvent(SDL_Event &e)
         }
         else
         {
-            Coordinate selected_coord{x / SQUARE_SIZE, y / SQUARE_SIZE};
+            Coordinate selected_coord{(x - wsize.leftOffset) / wsize.tileSize, y / wsize.tileSize};
             Piece *piece = board->getPieceAt(selected_coord);
 
             if (selected_piece != nullptr)
@@ -177,9 +153,56 @@ void ChessGame::handleEvent(SDL_Event &e)
                 {
                     if (moves[i].end == selected_coord)
                     {
-                        board->performMove(moves[i]);
+                        MoveType mvtype = board->performMove(moves[i]);
                         selected_piece = nullptr;
                         game->requestRender();
+
+                        switch (mvtype)
+                        {
+                        case MoveType::Enpassant:
+                        case MoveType::Normal:
+                            game->playSound(Sound::Move);
+                            break;
+                        case MoveType::Promotion:
+                            game->playSound(Sound::Promote);
+                            break;
+                        case MoveType::Capture:
+                            game->playSound(Sound::Capture);
+                            break;
+                        case MoveType::Castle:
+                            game->playSound(Sound::Castle);
+                            break;
+
+                        default:
+                            break;
+                        }
+
+                        GameState state = board->getGameState();
+
+                        if (state != GameState::Playing)
+                        {
+                            switch (state)
+                            {
+                            case GameState::WhiteWins:
+                            case GameState::BlackWins:
+                                game->playSound(Sound::Victory);
+                                break;
+                            case GameState::Draw:
+                            case GameState::Stalemate:
+                                game->playSound(Sound::Draw);
+                                break;
+                            default:
+                                break;
+                            }
+                            game->pushScene(new GameOver(game, state));
+                        }
+
+                        if (board->isWhiteInCheck() || board->isBlackInCheck())
+                        {
+                            game->playSound(Sound::Check);
+                            return;
+                        }
+
                         return;
                     }
                 }
@@ -200,10 +223,29 @@ void ChessGame::handleEvent(SDL_Event &e)
 
         game->requestRender();
     }
+}
 
-    GameState state = board->getGameState();
-    if (state != GameState::Playing)
-    {
-        game->pushScene(new GameOver(game, state));
-    }
+void ChessGame::renderTile(int x, int y, SDL_Color color)
+{
+    WindowSize wsize = game->getWindowSize();
+    SDL_Rect rect = {x * wsize.tileSize + wsize.leftOffset, y * wsize.tileSize + wsize.topOffset, wsize.tileSize, wsize.tileSize};
+    SDL_SetRenderDrawColor(game->getRenderer(), color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(game->getRenderer(), &rect);
+}
+
+void ChessGame::renderTile(Coordinate coord, SDL_Color color)
+{
+    renderTile(coord.x, coord.y, color);
+}
+
+void ChessGame::renderPiece(Piece *piece)
+{
+    WindowSize wsize = game->getWindowSize();
+
+    SDL_Rect rect = {piece->getPosition().x * wsize.tileSize + wsize.leftOffset, piece->getPosition().y * wsize.tileSize + wsize.topOffset, wsize.tileSize, wsize.tileSize};
+    Texture font(game->getRenderer());
+    font.loadChar(piece->getSymbol(), wsize.tileSize, color::RED);
+    // used to center the font
+    SDL_Rect dest = {rect.x + (wsize.tileSize - font.getWidth()) / 2, rect.y + (wsize.tileSize - font.getHeight()) / 2, font.getWidth(), font.getHeight()};
+    font.draw(NULL, &dest);
 }

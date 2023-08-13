@@ -57,7 +57,7 @@ Board::~Board()
 int Board::fromFEN(std::string fen)
 {
   using namespace std;
-  cerr << "Parsing FEN: " << fen << endl;
+  // cerr << "Parsing FEN: " << fen << endl;
 
   whiteKing = nullptr;
   blackKing = nullptr;
@@ -164,9 +164,6 @@ int Board::fromFEN(std::string fen)
   }
   fullMoveClock = atoi(buf2);
 
-  cerr << "Successfully parsed FEN" << endl;
-  display_meta();
-
   // Other things
   state = GameState::Playing;
   promotionPiece = nullptr;
@@ -177,6 +174,7 @@ int Board::fromFEN(std::string fen)
   if (blackKing == nullptr)
     throw Error(ErrorCode::BlackKingNotFound);
 
+  // cerr << "Successfully parsed FEN" << endl;
   return 0;
 }
 
@@ -410,7 +408,7 @@ void Board::moveUnchecked(Move _move)
   }
 }
 
-void Board::performMove(Move _move)
+MoveType Board::performMove(Move _move)
 {
   // Disallow moving if a promotion is pending
   if (isWaitingForPromotion())
@@ -421,17 +419,11 @@ void Board::performMove(Move _move)
 
   // check if there is a piece to move
   if (startPiece == nullptr)
-  {
-    std::cerr << "No piece to move" << std::endl;
-    return;
-  }
+    throw Error(ErrorCode::NoStartPiece);
 
   bool isCorrectTurn = isWhiteTurn == startPiece->isWhite();
   if (!isCorrectTurn)
-  {
-    std::cerr << "It is not your turn" << std::endl;
-    return;
-  }
+    throw Error(ErrorCode::IncorrectTurn);
 
   std::vector<Move> moves = startPiece->getLegalMoves(*this);
   bool isValidMove = false;
@@ -447,13 +439,14 @@ void Board::performMove(Move _move)
   }
 
   if (!isValidMove)
-    return;
+    throw Error(ErrorCode::InvalidMove);
 
   // Store if pawn has moved two pieces
   // Used after move has been performed to set enpassant target square
   bool pawntwomoves = isPawnTwoMovesAhead(this, _move);
   bool kingsidec = isKingSideCastle(this, _move);
   bool queensidec = isQueenSideCastle(this, _move);
+  MoveType mvType = MoveType::Normal;
 
   // Move the pieces
   if (kingsidec != 0 || queensidec != 0) // Handles casting
@@ -495,7 +488,8 @@ void Board::performMove(Move _move)
     {
       int offset = isWhiteTurn ? 0 : 2;
       canCastle[offset] = false;
-      canCastle[offset+1] = false;
+      canCastle[offset + 1] = false;
+      mvType = MoveType::Castle;
     }
   }
   else if (isEnpassant(this, _move))
@@ -509,6 +503,8 @@ void Board::performMove(Move _move)
 
     pieces[_move.end.y][_move.end.x] = startPiece;
     pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+
+    mvType = MoveType::Enpassant;
   }
   else if (isPromotion(this, _move)) // Handles promotion
   {
@@ -517,12 +513,19 @@ void Board::performMove(Move _move)
     pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
 
     promotionPiece = startPiece;
+
+    mvType = MoveType::Promotion;
   }
   else // Handles other moves
   {
     pieces[_move.start.y][_move.start.x] = nullptr;
     pieces[_move.end.y][_move.end.x] = startPiece;
     pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+
+    if (isCapture(this, _move))
+    {
+      mvType = MoveType::Capture;
+    }
   }
 
   // Set enpassant target if pawn has moved two moves ahead
@@ -602,6 +605,8 @@ void Board::performMove(Move _move)
     std::cerr
         << "Stalemate!" << std::endl;
   }
+
+  return mvType;
 }
 
 // Helper function to create a piece at given coordinate

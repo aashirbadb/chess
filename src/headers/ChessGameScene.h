@@ -14,4 +14,9 @@ public:
     ~ChessGame() override;
     void render() override;
     void handleEvent(SDL_Event &e) override;
+
+private:
+    void renderTile(int x, int y, SDL_Color color);
+    void renderTile(Coordinate coord, SDL_Color color);
+    void renderPiece(Piece *piece);
 };

@@ -9,6 +9,7 @@ typedef std::unordered_map<int, TTF_Font *> FontMap;
 class Texture
 {
     int h, w;
+    SDL_Rect rect;
     SDL_Texture *texture;
     SDL_Renderer *renderer;
     static FontMap FONTS;
@@ -21,6 +22,7 @@ public:
     int getWidth() { return w; }
 
     TTF_Font *getFont(int fontsize);
+    SDL_Rect getRect();
 
     void loadChar(char ch, int fontsize, SDL_Color color);
     void loadString(const char *str, int fontsize, SDL_Color color);

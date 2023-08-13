@@ -9,6 +9,7 @@ Texture::Texture(SDL_Renderer *r)
     texture = nullptr;
     h = 0;
     w = 0;
+    rect = {0, 0, 0, 0};
 }
 
 Texture::~Texture()
@@ -22,7 +23,7 @@ TTF_Font *Texture::getFont(int fontsize)
 
     if (font == nullptr)
     {
-        std::cerr << "Font of size " << fontsize << " not found. Creating new one." << std::endl;
+        // std::cerr << "Font of size " << fontsize << " not found. Creating new one." << std::endl;
         font = TTF_OpenFont("assets/Roboto.ttf", fontsize);
         FONTS[fontsize] = font;
     }
@@ -37,6 +38,7 @@ void Texture::loadChar(char ch, int fontsize, SDL_Color color)
 
     h = text->h;
     w = text->w;
+    rect = text->clip_rect;
 
     texture = SDL_CreateTextureFromSurface(renderer, text);
 
@@ -51,6 +53,7 @@ void Texture::loadString(const char *str, int fontsize, SDL_Color color)
 
     h = text->h;
     w = text->w;
+    rect = text->clip_rect;
 
     texture = SDL_CreateTextureFromSurface(renderer, text);
 
@@ -60,6 +63,11 @@ void Texture::loadString(const char *str, int fontsize, SDL_Color color)
 void Texture::draw(SDL_Rect *src, SDL_Rect *dest)
 {
     SDL_RenderCopy(renderer, texture, src, dest);
+}
+
+SDL_Rect Texture::getRect()
+{
+    return rect;
 }
 
 void Texture::clearTextures()

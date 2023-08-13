@@ -9,11 +9,14 @@
 #include "gameScene.h"
 #include "texture.h"
 #include <SDL2/SDL_blendmode.h>
+#include "sound.h"
 
 #define SQUARE_SIZE 85
-#define BOARD_SIZE SQUARE_SIZE * 8
+#define BOARD_SIZE (SQUARE_SIZE * 8)
 #define WINDOW_HEIGHT BOARD_SIZE
-#define WINDOW_WIDTH BOARD_SIZE
+#define LEFT_OFFSET 200
+#define RIGHT_OFFSET 200
+#define WINDOW_WIDTH (BOARD_SIZE + LEFT_OFFSET + RIGHT_OFFSET)
 namespace color
 {
     const SDL_Color WHITE = {255, 255, 255, SDL_ALPHA_OPAQUE};
@@ -31,15 +34,36 @@ namespace color
 
 class GameScene;
 
+struct WindowSize
+{
+    int height, width;
+    int topOffset, bottomOffset;
+    int leftOffset, rightOffset;
+    int tileSize, boardSize;
+};
+
+inline bool operator==(WindowSize a, WindowSize b)
+{
+    return (a.height == b.height && a.width == b.width);
+}
+
+inline bool operator!=(WindowSize a, WindowSize b)
+{
+    return !(a.height == b.height && a.width == b.width);
+}
+
 class Game
 {
     bool quit;
     bool render_requested;
+    WindowSize sizes;
+    bool muted;
 
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_Event event;
 
+    SoundManager *sound;
     std::stack<GameScene *> scenes;
 
 public:
@@ -50,6 +74,10 @@ public:
     SDL_Renderer *getRenderer();
     void quitGame();
     void requestRender();
+    void calculateWindowSize();
+    WindowSize getWindowSize() const;
+
+    void playSound(Sound _sound);
 
     void pushScene(GameScene *sc);
     GameScene *popScene();

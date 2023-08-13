@@ -9,8 +9,10 @@ enum class ErrorCode
     MultipleBlackKing,
     NoStartPiece,
     InvalidPiece,
+    InvalidMove,
     WaitingPromotion,
-    Message
+    IncorrectTurn,
+    Message,
 };
 
 class Error : public std::exception
@@ -57,6 +59,12 @@ public:
             break;
         case ErrorCode::InvalidPiece:
             return "Invalid piece";
+            break;
+        case ErrorCode::InvalidMove:
+            return "Trying to perform invalid move";
+            break;
+        case ErrorCode::IncorrectTurn:
+            return "Trying to perform move on incorrect turn";
             break;
         case ErrorCode::Message:
             return error.c_str();
