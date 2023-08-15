@@ -7,7 +7,7 @@
 Game::Game()
 {
     quit = false;
-    render_requested = true;
+
     SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 
     // window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
@@ -50,9 +50,14 @@ Game::~Game()
 
 void Game::start()
 {
+    Uint64 timeperframe = 1000 / FPS;
     while (!quit)
     {
-        SDL_WaitEvent(&event);
+        Uint64 start = SDL_GetTicks64();
+
+        SDL_PollEvent(&event);
+
+        // SDL_WaitEvent(&event);
         switch (event.type)
         {
         case SDL_QUIT:
@@ -61,7 +66,6 @@ void Game::start()
 
         case SDL_WINDOWEVENT:
             calculateWindowSize();
-            requestRender();
             break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -72,22 +76,25 @@ void Game::start()
             break;
 
         default:
-            requestRender();
             break;
         }
+
         // No need to render if user has quit
         if (quit)
             break;
 
-        // Render board/game only if render is requested
-        if (render_requested)
-        {
-            SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-            SDL_RenderClear(renderer);
-            scenes.top()->render();
-            SDL_RenderPresent(renderer);
-        }
-        render_requested = false;
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(renderer);
+        scenes.top()->render();
+        SDL_RenderPresent(renderer);
+
+        scenes.top()->update();
+        Uint64 end = SDL_GetTicks64();
+
+        float elapsedMS = (end - start);
+
+        // Cap to 60 FPS
+        SDL_Delay(std::max((long int)(1000 / FPS - elapsedMS), (long int)0));
     }
 }
 
@@ -101,22 +108,16 @@ void Game::quitGame()
     quit = true;
 }
 
-void Game::requestRender()
-{
-    render_requested = true;
-}
-
 void Game::pushScene(GameScene *sc)
 {
     scenes.push(sc);
-    render_requested = true;
 }
 
 GameScene *Game::popScene()
 {
     GameScene *temp = scenes.top();
     scenes.pop();
-    render_requested = true;
+
     return temp;
 }
 

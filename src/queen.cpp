@@ -25,12 +25,12 @@ std::vector<Move> Queen::getAllMoves(Board &_board)
         {
             if (isOpponentPieceAt(next_position, &_board))
             {
-                moves.push_back(Move{.start = position, .end = next_position});
+                moves.push_back(Move{position, next_position});
                 break;
             }
             else if (_board.getPieceAt(next_position) == nullptr)
             {
-                moves.push_back(Move{.start = position, .end = next_position});
+                moves.push_back(Move{position, next_position});
             }
             else
             {

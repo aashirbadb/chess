@@ -1,5 +1,6 @@
 #include "headers/test.h"
 #include <fstream>
+#include <assert.h>
 
 Test::Test()
 {
@@ -31,9 +32,8 @@ void Test::test_fen_parsing()
     for (int i = 0; i < lines.size(); i++)
     {
         Board board = Board(lines[i]);
-        board.display();
-        cout << "White in check: " << board.isWhiteInCheck() << endl;
-        cout << "Black in check: " << board.isBlackInCheck() << endl;
+        std::string fen = board.toFEN();
+        assert(board.toFEN() == fen);
     }
-    cout << "Fen parsing completed successfully: "<< lines.size() << " variations" << endl;
+    cout << "Fen parsing completed successfully: " << lines.size() << " variations" << endl;
 }

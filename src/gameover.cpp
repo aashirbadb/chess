@@ -59,7 +59,11 @@ void GameOver::handleEvent(SDL_Event &e)
         if (hasClickedInsideButton(x, y, menubutton))
         {
             game->pushScene(new GameMenu(game));
-            game->requestRender();
+            //
         }
     }
+}
+
+void GameOver::update()
+{
 }

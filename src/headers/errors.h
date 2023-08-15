@@ -34,6 +34,11 @@ public:
 
     ~Error() {}
 
+    const ErrorCode getCode() const
+    {
+        return code;
+    }
+
     const char *
     what() const noexcept override
     {

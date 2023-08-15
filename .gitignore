@@ -36,3 +36,6 @@
 build
 
 *.pgn
+
+stockfish-windows.exe 
+stockfish-linux

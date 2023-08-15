@@ -10,4 +10,5 @@ public:
 
     void render() override;
     void handleEvent(SDL_Event &e) override;
+    void update() override;
 };

@@ -35,11 +35,8 @@ std::vector<Move> King::getAllMoves(Board &_board)
         }
     }
 
-    // TODO: Generate moves for castling
-    // Castling rules:
-    // - The king is not in check
-    // - The rook/king should not have moved
-    // - Any path from king to rook should not be attacked by any piece
+    // Generate castling moves
+    // We only check if there are blocking pieces in the path here
     int tempy = isColorWhite ? 7 : 0;
     if (_board.castlingAvailable(isColorWhite ? 'K' : 'k'))
     {

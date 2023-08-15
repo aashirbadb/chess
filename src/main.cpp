@@ -5,6 +5,7 @@
 #include "headers/test.h"
 #include "headers/game.h"
 #include "headers/texture.h"
+#include "headers/stockfish.h"
 
 void show_valid_positions_at(Coordinate coord, Board &board)
 {
@@ -48,6 +49,14 @@ int main(int argc, char **argv)
     }
 
     Texture::clearTextures();
+    // Stockfish stf;
+    // stf.getBestMove(STARTING_FEN);
+
+    // Board b;
+    // b.display();
+    // std::cout << STARTING_FEN << std::endl
+    //           << b.toFEN() << std::endl;
+
 
     return 0;
 }

@@ -17,6 +17,9 @@
 #define LEFT_OFFSET 200
 #define RIGHT_OFFSET 200
 #define WINDOW_WIDTH (BOARD_SIZE + LEFT_OFFSET + RIGHT_OFFSET)
+
+#define FPS 60
+
 namespace color
 {
     const SDL_Color WHITE = {255, 255, 255, SDL_ALPHA_OPAQUE};
@@ -55,7 +58,6 @@ inline bool operator!=(WindowSize a, WindowSize b)
 class Game
 {
     bool quit;
-    bool render_requested;
     WindowSize sizes;
     bool muted;
 
@@ -73,7 +75,6 @@ public:
 
     SDL_Renderer *getRenderer();
     void quitGame();
-    void requestRender();
     void calculateWindowSize();
     WindowSize getWindowSize() const;
 

@@ -61,6 +61,7 @@ public:
     Board(Board &_board);
 
     int fromFEN(std::string fen);
+    std::string toFEN();
 
     void display();
     void display_meta();

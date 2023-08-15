@@ -51,7 +51,7 @@ std::vector<Move> Pawn::getAllMoves(Board &_board)
         moves.push_back({position, nextMove});
     }
 
-    // TODO: Generate move for enpassant
+    // enpassant moves
     Coordinate enPassantTarget = _board.getEnpassantTarget();
     if (enPassantTarget.isValidPosition())
     {

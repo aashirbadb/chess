@@ -16,6 +16,7 @@ public:
     virtual ~GameScene() {}
     virtual void handleEvent(SDL_Event &e) = 0;
     virtual void render() = 0;
+    virtual void update() = 0;
 
     static inline bool hasClickedInsideButton(int x, int y, SDL_Rect rect)
     {

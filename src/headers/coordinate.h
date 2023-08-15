@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include "errors.h"
 
 struct Coordinate
 {
@@ -19,6 +20,19 @@ struct Coordinate
     {
         x = a - 'a';
         y = '1' + 7 - b;
+    }
+
+    Coordinate(std::string str)
+    {
+        if (str.length() < 2)
+        {
+            throw Error("Trying to create coordinate with <2 characters");
+        }
+        else
+        {
+            x = str[0] - 'a';
+            y = '1' + 7 - str[1];
+        }
     }
 
     bool isValidPosition()

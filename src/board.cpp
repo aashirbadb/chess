@@ -86,7 +86,7 @@ int Board::fromFEN(std::string fen)
       current_x = 0;
       continue;
     }
-    else if (isdigit(current_char))
+    else if (isdigit(current_char) > 0)
     {
       current_x += current_char - '0';
     }
@@ -110,26 +110,32 @@ int Board::fromFEN(std::string fen)
 
   // If there is '-' then no castling is available
   // If there is ' ' then some castling was found and set
-  while (fen[index] != ' ' && fen[index] != '-')
+  if (fen[index] == '-')
   {
-    switch (fen[index])
-    {
-    case 'K':
-      canCastle[0] = true;
-      break;
-    case 'Q':
-      canCastle[1] = true;
-      break;
-    case 'k':
-      canCastle[2] = true;
-      break;
-    case 'q':
-      canCastle[3] = true;
-      break;
-    }
     index++;
   }
-
+  else
+  {
+    while (fen[index] != ' ')
+    {
+      switch (fen[index])
+      {
+      case 'K':
+        canCastle[0] = true;
+        break;
+      case 'Q':
+        canCastle[1] = true;
+        break;
+      case 'k':
+        canCastle[2] = true;
+        break;
+      case 'q':
+        canCastle[3] = true;
+        break;
+      }
+      index++;
+    }
+  }
   index++;
 
   // En passant target square
@@ -143,26 +149,33 @@ int Board::fromFEN(std::string fen)
     enPassantTarget = {fen[index], fen[index + 1]};
     index += 2;
   }
+
   index++;
 
   // Halfmove clock
   char buf1[8] = {'\0'};
   int idx = 0;
-  while (isdigit(fen[index]))
+  while (isdigit(fen[index]) > 0)
   {
-    buf1[idx++] = fen[index++];
+    buf1[idx] = fen[index];
+    index++;
+    idx++;
   }
-  halfMoveClock = atoi(buf1);
   index++;
+  buf1[idx] = '\0';
+  halfMoveClock = atoi(buf1);
 
   // Fullmove clock
   char buf2[8] = {'\0'};
   idx = 0;
-  while (isdigit(fen[index]))
+  while (isdigit(fen[index]) > 0)
   {
-    buf2[idx++] = fen[index++];
+    buf2[idx] = fen[index];
+    index++;
+    idx++;
   }
   fullMoveClock = atoi(buf2);
+  index++;
 
   // Other things
   state = GameState::Playing;
@@ -174,8 +187,70 @@ int Board::fromFEN(std::string fen)
   if (blackKing == nullptr)
     throw Error(ErrorCode::BlackKingNotFound);
 
-  // cerr << "Successfully parsed FEN" << endl;
   return 0;
+}
+
+std::string Board::toFEN()
+{
+  std::string res;
+  for (int i = 0; i < 8; i++)
+  {
+    int count = 0;
+    for (int j = 0; j < 8; j++)
+    {
+      Piece *pc = pieces[i][j];
+      if (pc == nullptr)
+      {
+        count++;
+      }
+      else
+      {
+        if (count > 0)
+          res.append(std::to_string(count));
+
+        count = 0;
+        res.push_back(pc->getSymbol());
+      }
+    }
+    if (count > 0)
+      res.append(std::to_string(count));
+    if (i != 7)
+      res.push_back('/');
+  }
+
+  res.push_back(' ');
+  res.push_back(isWhiteTurn ? 'w' : 'b');
+  res.push_back(' ');
+  bool cast = false;
+  if (!canCastle[0] && !canCastle[1] && !canCastle[2] && !canCastle[3])
+    res.push_back('-');
+
+  if (canCastle[0])
+    res.push_back('K');
+
+  if (canCastle[1])
+    res.push_back('Q');
+
+  if (canCastle[2])
+    res.push_back('k');
+
+  if (canCastle[3])
+    res.push_back('q');
+
+  res.push_back(' ');
+
+  if (enPassantTarget.isValidPosition())
+    res.append(enPassantTarget.getChessCoordinate());
+  else
+    res.push_back('-');
+
+  res.push_back(' ');
+  res.append(std::to_string(halfMoveClock));
+
+  res.push_back(' ');
+  res.append(std::to_string(fullMoveClock));
+
+  return res;
 }
 
 void Board::display()
@@ -367,14 +442,9 @@ void Board::moveUnchecked(Move _move)
   {
     int tempy = isWhiteTurn ? 7 : 0;
     Piece *king = getPieceAt({4, tempy});
-    if (king == nullptr)
-      throw Error("Attempting to perform castle when king is not in starting position");
-
     if (kingsidec == 1)
     {
       Piece *rook = getPieceAt({7, tempy});
-      if (rook == nullptr)
-        throw Error("Attempting to perform castle when rook is not in starting position");
 
       pieces[tempy][4] = nullptr; // remove king
       pieces[tempy][7] = nullptr; // remove rook
@@ -387,9 +457,6 @@ void Board::moveUnchecked(Move _move)
     if (queensidec == 1)
     {
       Piece *rook = getPieceAt({0, tempy});
-      if (rook == nullptr)
-        throw Error("Attempting to perform castle when rook is not in starting position");
-
       pieces[tempy][0] = nullptr; // remove rook
       pieces[tempy][2] = king;    // place king
       pieces[tempy][3] = rook;    // place rook
@@ -410,9 +477,12 @@ void Board::moveUnchecked(Move _move)
 
 MoveType Board::performMove(Move _move)
 {
+  std::cout << toFEN() << std::endl;
   // Disallow moving if a promotion is pending
   if (isWaitingForPromotion())
+  {
     throw Error(ErrorCode::WaitingPromotion);
+  }
 
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
@@ -513,6 +583,11 @@ MoveType Board::performMove(Move _move)
     pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
 
     promotionPiece = startPiece;
+
+    if (_move.promotion)
+    {
+      promoteTo(_move.promotion);
+    }
 
     mvType = MoveType::Promotion;
   }
@@ -790,15 +865,11 @@ bool Board::isWaitingForPromotion()
 
 void Board::promoteTo(char _type)
 {
-  if (promotionPiece != nullptr)
+  if ((promotionPiece != nullptr))
   {
-    std::cout << promotionPiece->getSymbol() << promotionPiece->isWhite() << _type << isUppercase(_type) << std::endl;
-  }
-
-  if ((promotionPiece != nullptr) && (promotionPiece->isWhite() == isUppercase(_type)))
-  {
+    char promopc = isWhiteTurn ? toupper(_type) : tolower(_type);
     Coordinate dest = promotionPiece->getPosition();
-    Piece *temp = createPiece(dest, _type);
+    Piece *temp = createPiece(dest, promopc);
     pieces[dest.y][dest.x] = temp;
     promotionPiece = nullptr;
   }

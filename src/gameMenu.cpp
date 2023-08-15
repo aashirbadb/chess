@@ -43,3 +43,5 @@ void GameMenu::handleEvent(SDL_Event &e)
         }
     }
 }
+
+void GameMenu::update() {}
