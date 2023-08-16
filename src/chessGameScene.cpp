@@ -63,6 +63,15 @@ void ChessGame::render()
         }
     }
 
+    // Highlight last move
+    std::vector<Move> prevmoves = board->getPreviousMoves();
+    if (prevmoves.size() > 0)
+    {
+        Move prevmv = prevmoves.back();
+        renderTile(prevmv.start.x, prevmv.start.y, color::PREV_MOVE_TILE);
+        renderTile(prevmv.end.x, prevmv.end.y, color::PREV_MOVE_TILE);
+    }
+
     // Highlight if there is check
     if (board->isWhiteInCheck())
     {
@@ -94,7 +103,7 @@ void ChessGame::render()
     for (int i = 0; i < 8; i++)
     {
         Texture coltexture(game->getRenderer());
-        coltexture.loadChar(columnlabel[i], wsize.tileSize / 5, color::BLUE);
+        coltexture.loadChar(columnlabel[i], wsize.tileSize / 5, board->getBoardColorAt(i, 7) ? color::BLACK_TILE : color::WHITE_TILE);
         SDL_Rect colrect = {
             i * wsize.tileSize + wsize.leftOffset + 2,
             wsize.boardSize + wsize.topOffset - coltexture.getHeight(),
@@ -104,7 +113,7 @@ void ChessGame::render()
         coltexture.draw(NULL, &colrect);
 
         Texture rowtexture(game->getRenderer());
-        rowtexture.loadChar(rowlabel[7 - i], wsize.tileSize / 5, color::BLUE);
+        rowtexture.loadChar(rowlabel[7 - i], wsize.tileSize / 5, board->getBoardColorAt(7, i) ? color::BLACK_TILE : color::WHITE_TILE);
         SDL_Rect rowrect = {
             wsize.boardSize - rowtexture.getWidth() + wsize.leftOffset - 2,
             i * wsize.tileSize + wsize.topOffset + 2,
@@ -175,8 +184,6 @@ void ChessGame::handleEvent(SDL_Event &e)
         else
         {
         }
-
-        //
     }
 }
 

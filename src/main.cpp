@@ -57,6 +57,5 @@ int main(int argc, char **argv)
     // std::cout << STARTING_FEN << std::endl
     //           << b.toFEN() << std::endl;
 
-
     return 0;
 }

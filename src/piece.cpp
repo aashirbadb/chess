@@ -69,7 +69,6 @@ std::vector<Move> Piece::getLegalMoves(Board &_board)
         }
     }
 
-    allMoves.clear();
     return legalMoves;
 }
 

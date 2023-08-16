@@ -33,6 +33,7 @@ namespace color
     const SDL_Color CHECK_TILE = RED;
     const SDL_Color SELECTED_TILE = GREEN;
     const SDL_Color MOVE_TILE = GREEN;
+    const SDL_Color PREV_MOVE_TILE = {0, 0, 255, 128};
 }
 
 class GameScene;

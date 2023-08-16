@@ -31,9 +31,6 @@ inline int isKingSideCastle(Board *_board, Move _move)
 {
     Piece *piece = _board->getPieceAt(_move.start);
 
-    // We don't check other conditions required to be a true castle here because
-    // if this returns false, the move gets treated like a normal move and
-    // the king moves two moves
     if (piece != nullptr && tolower(piece->getSymbol()) == 'k' && _move.start.x == 4 && (_move.end.x == 6 || _move.end.x == 7))
     {
         if (!_board->isPlayerInCheck())

@@ -16,7 +16,6 @@ Board::Board(std::string fen)
 
 Board::Board(Board &src)
 {
-
   whiteKing = nullptr;
   blackKing = nullptr;
 
@@ -24,13 +23,13 @@ Board::Board(Board &src)
   {
     for (int j = 0; j < 8; j++)
     {
-      if (src.pieces[j][i] == nullptr)
+      if (src.getPieceAt({j, i}) == nullptr)
       {
-        pieces[j][i] = nullptr;
+        getPieceAt({j, i}) = nullptr;
       }
       else
       {
-        pieces[j][i] = createPiece(src.pieces[j][i]->getPosition(), src.pieces[j][i]->getSymbol());
+        getPieceAt({j, i}) = createPiece(src.getPieceAt({j, i})->getPosition(), src.getPieceAt({j, i})->getSymbol());
       }
     }
   }
@@ -67,7 +66,7 @@ int Board::fromFEN(std::string fen)
   {
     for (int j = 0; j < 8; j++)
     {
-      pieces[j][i] = nullptr;
+      getPieceAt({i, j}) = nullptr;
     }
   }
 
@@ -92,7 +91,7 @@ int Board::fromFEN(std::string fen)
     }
     else
     {
-      pieces[current_y][current_x] = createPiece({current_x, current_y}, current_char);
+      getPieceAt({current_x, current_y}) = createPiece({current_x, current_y}, current_char);
       current_x++;
     }
   }
@@ -198,7 +197,7 @@ std::string Board::toFEN()
     int count = 0;
     for (int j = 0; j < 8; j++)
     {
-      Piece *pc = pieces[i][j];
+      Piece *pc = getPieceAt({j, i});
       if (pc == nullptr)
       {
         count++;
@@ -262,9 +261,9 @@ void Board::display()
     cout << 8 - i << " |";
     for (int j = 0; j < 8; j++)
     {
-      if (pieces[i][j])
+      if (getPieceAt({j, i}))
       {
-        cout << pieces[i][j]->getSymbol();
+        cout << getPieceAt({j, i})->getSymbol();
         cout << '|';
       }
       else
@@ -332,7 +331,7 @@ bool Board::getBoardColorAt(int x, int y)
   }
 }
 
-Piece *Board::getPieceAt(Coordinate _coord)
+Piece *&Board::getPieceAt(Coordinate _coord)
 {
   return pieces[_coord.y][_coord.x];
 }
@@ -432,7 +431,7 @@ void Board::moveUnchecked(Move _move)
 
   if (isEnpassant(this, _move))
   {
-    pieces[_move.start.y][_move.end.x] = nullptr; // capture opponent piece
+    getPieceAt({_move.end.x, _move.start.y}) = nullptr; // capture opponent piece
   }
 
   bool kingsidec = isKingSideCastle(this, _move);
@@ -446,10 +445,10 @@ void Board::moveUnchecked(Move _move)
     {
       Piece *rook = getPieceAt({7, tempy});
 
-      pieces[tempy][4] = nullptr; // remove king
-      pieces[tempy][7] = nullptr; // remove rook
-      pieces[tempy][5] = rook;    // place rook
-      pieces[tempy][6] = king;    // place king
+      getPieceAt({4, tempy}) = nullptr; // remove king
+      getPieceAt({7, tempy}) = nullptr; // remove rook
+      getPieceAt({5, tempy}) = rook;    // place rook
+      getPieceAt({6, tempy}) = king;    // place king
       rook->updateCoordinate({5, tempy});
       king->updateCoordinate({6, tempy});
     }
@@ -457,10 +456,10 @@ void Board::moveUnchecked(Move _move)
     if (queensidec == 1)
     {
       Piece *rook = getPieceAt({0, tempy});
-      pieces[tempy][0] = nullptr; // remove rook
-      pieces[tempy][2] = king;    // place king
-      pieces[tempy][3] = rook;    // place rook
-      pieces[tempy][4] = nullptr; // remove king
+      getPieceAt({0, tempy}) = nullptr; // remove rook
+      getPieceAt({2, tempy}) = king;    // place king
+      getPieceAt({3, tempy}) = rook;    // place rook
+      getPieceAt({4, tempy}) = nullptr; // remove king
       rook->updateCoordinate({3, tempy});
       king->updateCoordinate({2, tempy});
     }
@@ -469,9 +468,9 @@ void Board::moveUnchecked(Move _move)
   {
 
     // Move directly
-    pieces[_move.start.y][_move.start.x] = nullptr;
-    pieces[_move.end.y][_move.end.x] = startPiece;
-    pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
+    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
+    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
   }
 }
 
@@ -532,10 +531,10 @@ MoveType Board::performMove(Move _move)
       if (rook == nullptr)
         throw Error("Attempting to perform castle when rook is not in starting position");
 
-      pieces[tempy][4] = nullptr; // remove king
-      pieces[tempy][7] = nullptr; // remove rook
-      pieces[tempy][5] = rook;    // place rook
-      pieces[tempy][6] = king;    // place king
+      getPieceAt({4, tempy}) = nullptr; // remove king
+      getPieceAt({7, tempy}) = nullptr; // remove rook
+      getPieceAt({5, tempy}) = rook;    // place rook
+      getPieceAt({6, tempy}) = king;    // place king
       rook->updateCoordinate({5, tempy});
       king->updateCoordinate({6, tempy});
     }
@@ -546,10 +545,10 @@ MoveType Board::performMove(Move _move)
       if (rook == nullptr)
         throw Error("Attempting to perform castle when rook is not in starting position");
 
-      pieces[tempy][0] = nullptr; // remove rook
-      pieces[tempy][2] = king;    // place king
-      pieces[tempy][3] = rook;    // place rook
-      pieces[tempy][4] = nullptr; // remove king
+      getPieceAt({0, tempy}) = nullptr; // remove rook
+      getPieceAt({2, tempy}) = king;    // place king
+      getPieceAt({3, tempy}) = rook;    // place rook
+      getPieceAt({4, tempy}) = nullptr; // remove king
       rook->updateCoordinate({3, tempy});
       king->updateCoordinate({2, tempy});
     }
@@ -566,21 +565,21 @@ MoveType Board::performMove(Move _move)
   {
     int direction = isWhiteTurn ? 1 : -1;
 
-    pieces[_move.start.y][_move.start.x] = nullptr; // remove startpiece
-    pieces[_move.start.y][_move.end.x] = nullptr;   // capture opponent piece
+    getPieceAt({_move.start.x, _move.start.y}) = nullptr; // remove startpiece
+    getPieceAt({_move.end.x, _move.start.y}) = nullptr;   // capture opponent piece
 
     Coordinate opp = {_move.end.x, _move.start.y};
 
-    pieces[_move.end.y][_move.end.x] = startPiece;
-    pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
+    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
 
     mvType = MoveType::Enpassant;
   }
   else if (isPromotion(this, _move)) // Handles promotion
   {
-    pieces[_move.start.y][_move.start.x] = nullptr;
-    pieces[_move.end.y][_move.end.x] = startPiece;
-    pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
+    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
+    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
 
     promotionPiece = startPiece;
 
@@ -593,9 +592,9 @@ MoveType Board::performMove(Move _move)
   }
   else // Handles other moves
   {
-    pieces[_move.start.y][_move.start.x] = nullptr;
-    pieces[_move.end.y][_move.end.x] = startPiece;
-    pieces[_move.end.y][_move.end.x]->updateCoordinate(_move.end);
+    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
+    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
+    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
 
     if (isCapture(this, _move))
     {
@@ -680,6 +679,8 @@ MoveType Board::performMove(Move _move)
     std::cerr
         << "Stalemate!" << std::endl;
   }
+
+  previousMoves.push_back(_move);
 
   return mvType;
 }
@@ -816,9 +817,9 @@ std::vector<Piece *> Board::getWhitePieces()
   {
     for (int j = 0; j < 8; j++)
     {
-      if (pieces[j][i] != nullptr && pieces[j][i]->isWhite())
+      if (getPieceAt({i, j}) != nullptr && getPieceAt({i, j})->isWhite())
       {
-        pcs.push_back(pieces[j][i]);
+        pcs.push_back(getPieceAt({i, j}));
       }
     }
   }
@@ -833,9 +834,9 @@ std::vector<Piece *> Board::getBlackPieces()
   {
     for (int j = 0; j < 8; j++)
     {
-      if (pieces[j][i] != nullptr && !pieces[j][i]->isWhite())
+      if (getPieceAt({i, j}) != nullptr && !getPieceAt({i, j})->isWhite())
       {
-        pcs.push_back(pieces[j][i]);
+        pcs.push_back(getPieceAt({i, j}));
       }
     }
   }
@@ -870,12 +871,29 @@ void Board::promoteTo(char _type)
     char promopc = isWhiteTurn ? toupper(_type) : tolower(_type);
     Coordinate dest = promotionPiece->getPosition();
     Piece *temp = createPiece(dest, promopc);
-    pieces[dest.y][dest.x] = temp;
+    getPieceAt(dest) = temp;
     promotionPiece = nullptr;
+    previousMoves.back().promotion = promopc;
   }
 }
 
 Piece *Board::getPromotionPiece()
 {
   return promotionPiece;
+}
+
+std::vector<Move> Board::getPreviousMoves()
+{
+  return previousMoves;
+}
+
+void Board::undoLastMove()
+{
+  if (previousMoves.size() > 0)
+  {
+    Move prev = previousMoves.back();
+    // Undoing simple moves is easy. But we also need to handle undoing 
+    // moves like castling, promotion, and castling availability undo
+    throw Error("TODO:");
+  }
 }

@@ -3,6 +3,8 @@
 #include "coordinate.h"
 #include <vector>
 
+struct Move;
+
 class Board;
 class Piece
 {

@@ -53,6 +53,8 @@ private:
 
     Piece *promotionPiece;
 
+    std::vector<Move> previousMoves;
+
 public:
     Board();
     ~Board();
@@ -83,7 +85,7 @@ public:
 
     bool castlingAvailable(char _type);
 
-    Piece *getPieceAt(Coordinate _coord);
+    Piece *&getPieceAt(Coordinate _coord);
     Coordinate getEnpassantTarget();
 
     void moveUnchecked(Move _move);
@@ -101,4 +103,8 @@ public:
     bool isWaitingForPromotion();
     void promoteTo(char _type);
     Piece *getPromotionPiece();
+
+    std::vector<Move> getPreviousMoves();
+
+    void undoLastMove();
 };
