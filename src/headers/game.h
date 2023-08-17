@@ -27,11 +27,11 @@ namespace color
     const SDL_Color BLUE = {0, 0, 255, SDL_ALPHA_OPAQUE};
 
     const SDL_Color WHITE_TILE = WHITE;
-    const SDL_Color BLACK_TILE = BLACK;
+    const SDL_Color BLACK_TILE = BLUE;
     const SDL_Color CHECK_TILE = RED;
     const SDL_Color SELECTED_TILE = GREEN;
     const SDL_Color MOVE_TILE = GREEN;
-    const SDL_Color PREV_MOVE_TILE = BLUE;
+    const SDL_Color PREV_MOVE_TILE = {255, 255, 0, 255};
     const SDL_Color CAPTURE_TILE = {200, 0, 0, 128};
 }
 

@@ -883,6 +883,7 @@ void Board::promoteTo(char _type)
     getPieceAt(dest) = temp;
     promotionPiece = nullptr;
     previousMoves.back().promotion = promopc;
+    isWhiteTurn = !isWhiteTurn;
   }
 }
 

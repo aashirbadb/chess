@@ -3,11 +3,11 @@
 
 char ChessGame::columnlabel[9] = "abcdefgh";
 char ChessGame::rowlabel[9] = "12345678";
-char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'K'};
+char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'N'};
 
 ChessGame::ChessGame(Game *g) : GameScene(g)
 {
-    board = new Board("r2qkb1r/1b3ppp/p6P/2p1n2R/1P1p2P1/8/PB2BP2/RN1QK3 b KQkq - 4 19");
+    board = new Board("6r1/8/8/8/7K/8/2p2k2/8 w - - 0 65");
     selected_piece = nullptr;
     players[0] = new Human("Player 1");
     players[1] = new Human("Player 2");
@@ -304,11 +304,11 @@ void ChessGame::handleEvent(SDL_Event &e)
         int x, y;
         SDL_GetMouseState(&x, &y);
 
-        if (currentPlayer->isHuman() && board->isWaitingForPromotion())
+        if (playing && currentPlayer->isHuman() && board->isWaitingForPromotion())
         {
             handlePromotion(x, y);
         }
-        else if (currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
+        else if (playing && currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
         {
             // If player has clicked inside the board
             Coordinate board_coord{(x - wsize.leftOffset) / wsize.tileSize, (y - wsize.topOffset) / wsize.tileSize};
@@ -508,17 +508,18 @@ void ChessGame::loadTextures()
     playerNameTextures[1].loadString(players[1]->getName(), 48, color::BLACK);
 
     int fontsize = (wsize.width - wsize.leftOffset - wsize.boardSize - 20) / 4;
-    const char pieceSymbol[7] = "bknpqr";
+    const char pieceSymbol[7] = "BKNPQR";
     for (int i = 0; i < 6; i++)
     {
         char upper = toupper(pieceSymbol[i]);
         char lower = tolower(pieceSymbol[i]);
 
         pieceTextures[upper].setRenderer(renderer);
-        pieceTextures[upper].loadChar(upper, fontsize, color::RED);
+
+        pieceTextures[upper].loadImage("assets/w" + std::string(1, pieceSymbol[i]) + ".svg");
 
         pieceTextures[lower].setRenderer(renderer);
-        pieceTextures[lower].loadChar(lower, fontsize, color::RED);
+        pieceTextures[lower].loadImage("assets/b" + std::string(1, pieceSymbol[i]) + ".svg");
     }
 
     for (int i = 0; i < 8; i++)

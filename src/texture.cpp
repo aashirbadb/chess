@@ -101,7 +101,7 @@ void Texture::clearTextures()
 {
     for (auto &it : Texture::FONTS)
     {
-        TTF_CloseFont(it.second); //This causes segfault🤷🤷
+        TTF_CloseFont(it.second); // This causes segfault🤷🤷
     }
 }
 
@@ -110,9 +110,20 @@ void Texture::setRenderer(SDL_Renderer *r)
     renderer = r;
 }
 
-void Texture::loadImage(const char *path)
+void Texture::loadImage(std::string path)
 {
-    texture = IMG_LoadTexture(renderer, path);
+    texture = IMG_LoadTexture(renderer, path.c_str());
+
+    if (texture == nullptr)
+    {
+        std::cerr << "Error loading " << path << ": " << IMG_GetError() << std::endl;
+    }
+    SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+}
+
+void Texture::loadImage(std::string path, SDL_Rect size)
+{
+    texture = IMG_LoadTexture(renderer, path.c_str());
     if (texture == nullptr)
     {
         std::cerr << "Error loading " << path << ": " << IMG_GetError() << std::endl;

@@ -33,7 +33,9 @@ public:
 
     void loadChar(char ch, int fontsize, SDL_Color color);
     void loadString(std::string str, int fontsize, SDL_Color color);
-    void loadImage(const char *path);
+    void loadImage(std::string path);
+    void loadImage(std::string path, SDL_Rect size);
+
 
     void draw(SDL_Rect *src, SDL_Rect *dest);
     void draw(int x, int y);
