@@ -17,6 +17,7 @@ public:
     virtual void handleEvent(SDL_Event &e) = 0;
     virtual void render() = 0;
     virtual void update() = 0;
+    virtual void handleResize() {}
 
     static inline bool hasClickedInsideButton(int x, int y, SDL_Rect rect)
     {

@@ -3,7 +3,7 @@
 
 #include <SDL2/SDL.h>
 
-Stockfish::Stockfish(int lvl, int tout) : Player(false)
+Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
 {
     level = std::min(std::max(lvl, 0), 20);
     search_tout = tout;

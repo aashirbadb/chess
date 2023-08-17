@@ -2,22 +2,17 @@
 #include "coordinate.h"
 #include "errors.h"
 #include <iostream>
-#include "piece.h"
-
-class Piece;
 
 struct Move
 {
     Coordinate start, end;
     char promotion;
-    Piece *capturedPiece; // used to undo last move
 
     Move()
     {
         start = {-1, -1};
         end = {-1, -1};
         promotion = 0;
-        capturedPiece = nullptr;
     }
 
     Move(Coordinate x, Coordinate y)
@@ -25,12 +20,10 @@ struct Move
         start = x;
         end = y;
         promotion = 0;
-        capturedPiece = nullptr;
     }
 
     Move(std::string str)
     {
-        capturedPiece = nullptr;
         if (str.length() < 4)
         {
             throw Error("Trying to create a move with <4 characters");
@@ -48,7 +41,7 @@ struct Move
 
 inline std::ostream &operator<<(std::ostream &o, Move &m)
 {
-    o << m.start << m.end;
+    o << m.start << m.end << m.promotion;
     return o;
 }
 

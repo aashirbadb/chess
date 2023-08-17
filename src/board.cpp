@@ -468,9 +468,9 @@ void Board::moveUnchecked(Move _move)
   {
 
     // Move directly
-    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
-    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
-    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
+    getPieceAt(_move.start) = nullptr;
+    getPieceAt(_move.end) = startPiece;
+    getPieceAt(_move.end)->updateCoordinate(_move.end);
   }
 }
 
@@ -485,6 +485,7 @@ MoveType Board::performMove(Move _move)
 
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
+  Piece *capturePiece = endPiece;
 
   // check if there is a piece to move
   if (startPiece == nullptr)
@@ -564,22 +565,23 @@ MoveType Board::performMove(Move _move)
   else if (isEnpassant(this, _move))
   {
     int direction = isWhiteTurn ? 1 : -1;
+    Coordinate captureCoord = {_move.end.x, _move.start.y};
 
-    getPieceAt({_move.start.x, _move.start.y}) = nullptr; // remove startpiece
-    getPieceAt({_move.end.x, _move.start.y}) = nullptr;   // capture opponent piece
+    capturePiece = getPieceAt(captureCoord); // Special case
 
-    Coordinate opp = {_move.end.x, _move.start.y};
+    getPieceAt(_move.start) = nullptr;  // remove startpiece
+    getPieceAt(captureCoord) = nullptr; // capture opponent piece
 
-    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
-    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
+    getPieceAt(_move.end) = startPiece;
+    getPieceAt(_move.end)->updateCoordinate(_move.end);
 
     mvType = MoveType::Enpassant;
   }
   else if (isPromotion(this, _move)) // Handles promotion
   {
-    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
-    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
-    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
+    getPieceAt(_move.start) = nullptr;
+    getPieceAt(_move.end) = startPiece;
+    getPieceAt(_move.end)->updateCoordinate(_move.end);
 
     promotionPiece = startPiece;
 
@@ -592,14 +594,19 @@ MoveType Board::performMove(Move _move)
   }
   else // Handles other moves
   {
-    getPieceAt({_move.start.x, _move.start.y}) = nullptr;
-    getPieceAt({_move.end.x, _move.end.y}) = startPiece;
-    getPieceAt({_move.end.x, _move.end.y})->updateCoordinate(_move.end);
+    getPieceAt(_move.start) = nullptr;
+    getPieceAt(_move.end) = startPiece;
+    getPieceAt(_move.end)->updateCoordinate(_move.end);
 
     if (isCapture(this, _move))
     {
       mvType = MoveType::Capture;
     }
+  }
+
+  if (capturePiece != nullptr)
+  {
+    capturedPieces.push_back(capturePiece);
   }
 
   // Set enpassant target if pawn has moved two moves ahead
@@ -628,20 +635,19 @@ MoveType Board::performMove(Move _move)
   char startSymbol = startPiece->getSymbol();
 
   // Remove castling availability if rook or king moves
-
-  if (startSymbol == 'R' && (_move.start == Coordinate{7, 7})) // disable white kingside castle
+  if ((startSymbol == 'R') && (_move.start == Coordinate{7, 7})) // disable white kingside castle
   {
     canCastle[0] == false;
   }
-  else if (startSymbol == 'R' && (_move.start == Coordinate{7, 0})) // disable white queenside castle
+  else if ((startSymbol == 'R') && (_move.start == Coordinate{7, 0})) // disable white queenside castle
   {
     canCastle[1] = false;
   }
-  else if (startSymbol == 'r' && (_move.start == Coordinate{0, 7})) // disable black kingside castle
+  else if ((startSymbol == 'r') && (_move.start == Coordinate{0, 7})) // disable black kingside castle
   {
     canCastle[2] == false;
   }
-  else if (startSymbol == 'r' && (_move.start == Coordinate{0, 0})) // disable black queenside castle
+  else if ((startSymbol == 'r') && (_move.start == Coordinate{0, 0})) // disable black queenside castle
   {
     canCastle[3] = false;
   }
@@ -663,10 +669,12 @@ MoveType Board::performMove(Move _move)
     state = GameState::Draw;
   }
 
-  isWhiteTurn = !isWhiteTurn; // Change to opposite player's turn
+  if (!isWaitingForPromotion())
+    isWhiteTurn = !isWhiteTurn; // Change to opposite player's turn
 
   // Check for stalemates and checkmates
   std::vector<Move> allMoves = getAllPlayerLegalMoves(isWhiteTurn);
+
   if (allMoves.size() == 0 && isPlayerInCheck())
   {
     state = isWhiteTurn ? GameState::BlackWins : GameState::WhiteWins;
@@ -786,6 +794,7 @@ std::vector<Move> Board::getAllPlayerMoves(bool _white)
 std::vector<Move> Board::getAllPlayerLegalMoves(bool _white)
 {
   std::vector<Piece *> allpieces = _white ? getWhitePieces() : getBlackPieces();
+
   std::vector<Move> allMoves;
 
   for (int i = 0; i < allpieces.size(); i++)
@@ -892,8 +901,25 @@ void Board::undoLastMove()
   if (previousMoves.size() > 0)
   {
     Move prev = previousMoves.back();
-    // Undoing simple moves is easy. But we also need to handle undoing 
+    // Undoing simple moves is easy. But we also need to handle undoing
     // moves like castling, promotion, and castling availability undo
     throw Error("TODO:");
   }
+}
+
+void Board::resign()
+{
+  state = isWhiteTurn ? GameState::WhiteResigns : GameState::BlackResigns;
+}
+
+std::vector<Piece *> Board::getCapturedPieces(bool _whitePiece)
+{
+  std::vector<Piece *> pcs;
+  for (int i = 0; i < capturedPieces.size(); i++)
+  {
+    if (_whitePiece == capturedPieces[i]->isWhite())
+      pcs.push_back(capturedPieces[i]);
+  }
+
+  return pcs;
 }

@@ -11,21 +11,22 @@ enum class Sound
     Promote,
     Victory,
     Draw,
+    ButtonClick,
     ___LAST // used to get total number of sounds
 };
 const int TotalSounds = (int)Sound::___LAST;
 
 const char *getSoundPath(Sound _s);
-Sound getSoundFromInt(int i);
 
 class SoundManager
 {
-    Mix_Chunk *capture, *castle, *check, *move, *promote;
     static std::unordered_map<Sound, Mix_Chunk *> SOUNDS;
 
 public:
     SoundManager();
     ~SoundManager();
+
+    void init();
     void playCaptureSound() const;
     void playCastleSound() const;
     void playCheckSound() const;

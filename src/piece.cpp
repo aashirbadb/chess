@@ -51,12 +51,15 @@ bool Piece::isOwnPieceAt(Coordinate _coord, Board *_board)
 
 std::vector<Move> Piece::getLegalMoves(Board &_board)
 {
+
     std::vector<Move> allMoves = getAllMoves(_board);
 
     std::vector<Move> legalMoves;
 
     for (int i = 0; i < allMoves.size(); i++)
     {
+        if (getSymbol() == 'K')
+            std::cout << "here " << getPosition().getChessCoordinate() << " " << allMoves[i] << std::endl;
         Board nextMoveBoardPosition(_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
 

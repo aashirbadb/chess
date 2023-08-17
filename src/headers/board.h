@@ -23,6 +23,8 @@ enum class GameState
     Stalemate,
     WhiteWins,
     BlackWins,
+    WhiteResigns,
+    BlackResigns,
     Draw
 };
 
@@ -54,6 +56,7 @@ private:
     Piece *promotionPiece;
 
     std::vector<Move> previousMoves;
+    std::vector<Piece *> capturedPieces;
 
 public:
     Board();
@@ -105,6 +108,9 @@ public:
     Piece *getPromotionPiece();
 
     std::vector<Move> getPreviousMoves();
+    std::vector<Piece *> getCapturedPieces(bool _whitePiece);
 
     void undoLastMove();
+
+    void resign();
 };

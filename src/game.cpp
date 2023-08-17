@@ -23,29 +23,28 @@ Game::Game()
     calculateWindowSize();
 
     TTF_Init();
+
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+    soundManager.init();
 
-    sound = new SoundManager();
-
+    muted = false;
     scenes.push(new GameMenu(this));
 }
 
 Game::~Game()
 {
     TTF_Quit();
-
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
-
-    delete sound;
-
+    Mix_Quit();
     // clear the scenes stack
     while (!scenes.empty())
     {
         scenes.top()->~GameScene();
         scenes.pop();
     }
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
 }
 
 void Game::start()
@@ -66,6 +65,7 @@ void Game::start()
 
         case SDL_WINDOWEVENT:
             calculateWindowSize();
+            scenes.top()->handleResize();
             break;
 
         case SDL_MOUSEBUTTONDOWN:
@@ -161,5 +161,15 @@ WindowSize Game::getWindowSize() const
 void Game::playSound(Sound _sound)
 {
     if (!muted)
-        sound->play(_sound);
+        soundManager.play(_sound);
+}
+
+void Game::setMuted(bool mt)
+{
+    muted = mt;
+}
+
+bool Game::getMuted()
+{
+    return muted;
 }

@@ -38,7 +38,7 @@ std::vector<Move> King::getAllMoves(Board &_board)
     // Generate castling moves
     // We only check if there are blocking pieces in the path here
     int tempy = isColorWhite ? 7 : 0;
-    if (_board.castlingAvailable(isColorWhite ? 'K' : 'k'))
+    if (_board.castlingAvailable(isColorWhite ? 'K' : 'k') && _board.getPieceAt({7, tempy}))
     {
         Piece *a = _board.getPieceAt({5, tempy});
         Piece *b = _board.getPieceAt({6, tempy});
@@ -50,7 +50,7 @@ std::vector<Move> King::getAllMoves(Board &_board)
         }
     }
 
-    if (_board.castlingAvailable(isColorWhite ? 'Q' : 'q'))
+    if (_board.castlingAvailable(isColorWhite ? 'Q' : 'q') && _board.getPieceAt({0, tempy}))
     {
         Piece *a = _board.getPieceAt({1, tempy});
         Piece *b = _board.getPieceAt({2, tempy});

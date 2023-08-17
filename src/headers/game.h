@@ -14,9 +14,7 @@
 #define SQUARE_SIZE 85
 #define BOARD_SIZE (SQUARE_SIZE * 8)
 #define WINDOW_HEIGHT BOARD_SIZE
-#define LEFT_OFFSET 200
-#define RIGHT_OFFSET 200
-#define WINDOW_WIDTH (BOARD_SIZE + LEFT_OFFSET + RIGHT_OFFSET)
+#define WINDOW_WIDTH (BOARD_SIZE + 600)
 
 #define FPS 60
 
@@ -33,7 +31,8 @@ namespace color
     const SDL_Color CHECK_TILE = RED;
     const SDL_Color SELECTED_TILE = GREEN;
     const SDL_Color MOVE_TILE = GREEN;
-    const SDL_Color PREV_MOVE_TILE = {0, 0, 255, 128};
+    const SDL_Color PREV_MOVE_TILE = BLUE;
+    const SDL_Color CAPTURE_TILE = {200, 0, 0, 128};
 }
 
 class GameScene;
@@ -66,7 +65,7 @@ class Game
     SDL_Renderer *renderer;
     SDL_Event event;
 
-    SoundManager *sound;
+    SoundManager soundManager;
     std::stack<GameScene *> scenes;
 
 public:
@@ -84,4 +83,7 @@ public:
     void pushScene(GameScene *sc);
     GameScene *popScene();
     GameScene *currentScene();
+
+    bool getMuted();
+    void setMuted(bool mt);
 };
