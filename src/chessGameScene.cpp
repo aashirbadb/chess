@@ -3,11 +3,11 @@
 
 char ChessGame::columnlabel[9] = "abcdefgh";
 char ChessGame::rowlabel[9] = "12345678";
-char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'K'};
+char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'N'};
 
 ChessGame::ChessGame(Game *g) : GameScene(g)
 {
-    board = new Board("r2qkb1r/1b3ppp/p6P/2p1n2R/1P1p2P1/8/PB2BP2/RN1QK3 b KQkq - 4 19");
+    board = new Board();
     selected_piece = nullptr;
     players[0] = new Human("Player 1");
     players[1] = new Human("Player 2");
