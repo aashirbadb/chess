@@ -508,18 +508,27 @@ void ChessGame::loadTextures()
     playerNameTextures[1].loadString(players[1]->getName(), 48, color::BLACK);
 
     int fontsize = (wsize.width - wsize.leftOffset - wsize.boardSize - 20) / 4;
-    const char pieceSymbol[7] = "BKNPQR";
-    for (int i = 0; i < 6; i++)
+    const char *piecefilepath[] = {
+        "assets/white_bishop.png",
+        "assets/white_king.png",
+        "assets/white_knight.png",
+        "assets/white_pawn.png",
+        "assets/white_queen.png",
+        "assets/white_rook.png",
+        "assets/black_bishop.png",
+        "assets/black_king.png",
+        "assets/black_knight.png",
+        "assets/black_pawn.png",
+        "assets/black_queen.png",
+        "assets/black_rook.png",
+    };
+    const char pieceSymbol[] = "BKNPQRbknpqr";
+    for (int i = 0; pieceSymbol[i]; i++)
     {
-        char upper = toupper(pieceSymbol[i]);
-        char lower = tolower(pieceSymbol[i]);
 
-        pieceTextures[upper].setRenderer(renderer);
+        pieceTextures[pieceSymbol[i]].setRenderer(renderer);
 
-        pieceTextures[upper].loadImage("assets/w" + std::string(1, pieceSymbol[i]) + ".svg");
-
-        pieceTextures[lower].setRenderer(renderer);
-        pieceTextures[lower].loadImage("assets/b" + std::string(1, pieceSymbol[i]) + ".svg");
+        pieceTextures[(pieceSymbol[i])].loadImage(piecefilepath[i]);
     }
 
     for (int i = 0; i < 8; i++)
