@@ -8,7 +8,6 @@ int main(int argc, char **argv)
     try
     {
         Game game;
-        game.pushScene(new ChessGame(&game));
         game.start();
         Texture::clearTextures();
     }

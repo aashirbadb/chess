@@ -13,7 +13,7 @@ class Stockfish : public Player, private Communication::Process
     int search_tout;
 
 public:
-    Stockfish(int lvl, int tout = 20);
+    Stockfish(int lvl, int tout = 200);
     ~Stockfish() override;
 
     Move getBestMove(std::string fen);

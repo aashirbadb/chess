@@ -476,7 +476,6 @@ void Board::moveUnchecked(Move _move)
 
 MoveType Board::performMove(Move _move)
 {
-  std::cout << toFEN() << std::endl;
   // Disallow moving if a promotion is pending
   if (isWaitingForPromotion())
   {
@@ -587,9 +586,8 @@ MoveType Board::performMove(Move _move)
 
     if (_move.promotion)
     {
-      promoteTo(_move.promotion);
+      promoteTo(_move.promotion, false);
     }
-
     mvType = MoveType::Promotion;
   }
   else // Handles other moves
@@ -873,7 +871,7 @@ bool Board::isWaitingForPromotion()
   return promotionPiece != nullptr;
 }
 
-void Board::promoteTo(char _type)
+void Board::promoteTo(char _type, bool addtoprevmove)
 {
   if ((promotionPiece != nullptr))
   {
@@ -882,8 +880,11 @@ void Board::promoteTo(char _type)
     Piece *temp = createPiece(dest, promopc);
     getPieceAt(dest) = temp;
     promotionPiece = nullptr;
-    previousMoves.back().promotion = promopc;
-    isWhiteTurn = !isWhiteTurn;
+    if (addtoprevmove)
+    {
+      previousMoves.back().promotion = promopc;
+      isWhiteTurn = !isWhiteTurn;
+    }
   }
 }
 

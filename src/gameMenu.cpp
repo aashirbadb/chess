@@ -37,7 +37,7 @@ void GameMenu::render()
         multiplayerTexture.getHeight() + padding,
     };
 
-    SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 255, 0);
+    SDL_SetRenderDrawColor(game->getRenderer(), 255, 255, 255, 128);
     SDL_RenderFillRect(game->getRenderer(), &singleplayerbutton);
     SDL_RenderFillRect(game->getRenderer(), &multiplayerbutton);
 

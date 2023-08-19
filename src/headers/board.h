@@ -104,7 +104,7 @@ public:
     GameState getGameState();
 
     bool isWaitingForPromotion();
-    void promoteTo(char _type);
+    void promoteTo(char _type, bool addtoprevmove = true);
     Piece *getPromotionPiece();
 
     std::vector<Move> getPreviousMoves();
