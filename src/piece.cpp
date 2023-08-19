@@ -58,8 +58,6 @@ std::vector<Move> Piece::getLegalMoves(Board &_board)
 
     for (int i = 0; i < allMoves.size(); i++)
     {
-        if (getSymbol() == 'K')
-            std::cout << "here " << getPosition().getChessCoordinate() << " " << allMoves[i] << std::endl;
         Board nextMoveBoardPosition(_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
 

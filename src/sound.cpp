@@ -21,6 +21,8 @@ const char *getSoundPath(Sound _s)
         return "assets/victory.mp3";
     case Sound::Draw:
         return "assets/draw.mp3";
+    case Sound::Defeat:
+        return "assets/defeat.mp3";
     case Sound::ButtonClick:
         return "assets/buttonpress.wav";
     default:

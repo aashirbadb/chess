@@ -92,7 +92,7 @@ void ChessGame::render()
         wsize.leftOffset - spacing * 2,
         quitTexture.getHeight() + padding * 2,
     };
-    SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 200);
+    SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 255);
     SDL_RenderFillRect(game->getRenderer(), &quitButtonRect);
     quitTexture.drawCentered(quitButtonRect);
 
@@ -107,7 +107,6 @@ void ChessGame::render()
         };
         replayButtonRect = {0, 0, 0, 0};
 
-        SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 200);
         SDL_RenderFillRect(game->getRenderer(), &resignButtonRect);
         resignTexture.drawCentered(resignButtonRect);
     }
@@ -122,7 +121,6 @@ void ChessGame::render()
         };
         resignButtonRect = {0, 0, 0, 0};
 
-        SDL_SetRenderDrawColor(game->getRenderer(), 0, 0, 0, 200);
         SDL_RenderFillRect(game->getRenderer(), &replayButtonRect);
         replayTexture.drawCentered(replayButtonRect);
     }
@@ -274,22 +272,31 @@ void ChessGame::renderBoard()
 void ChessGame::renderPromotionMenu()
 {
     WindowSize wsize = game->getWindowSize();
-    // Show promotion menu
+    Coordinate pos = board->getPromotionPiece()->getPosition();
     bool whitePromotion = board->getPromotionPiece()->isWhite();
+
+    int start_x = pos.x;
+    int start_y = whitePromotion ? 0 : 4;
+
+    SDL_Rect boardrect = {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize};
+    SDL_SetRenderDrawColor(game->getRenderer(), 128, 128, 128, 128);
+    SDL_RenderFillRect(game->getRenderer(), &boardrect);
+
     for (int i = 0; i < 4; i++)
     {
-        SDL_Rect rect = {wsize.boardSize / 2 - (2 - i) * wsize.tileSize + wsize.leftOffset, wsize.boardSize / 2 - wsize.tileSize / 2, wsize.tileSize, wsize.tileSize};
-        SDL_Color rect_bg;
-        if (i % 2 == 0)
-            rect_bg = color::GREEN;
-        else
-            rect_bg = color::BLUE;
+        SDL_Rect rect = {
+            wsize.leftOffset + start_x * wsize.tileSize,
+            wsize.topOffset + (start_y + i) * wsize.tileSize,
+            wsize.tileSize,
+            wsize.tileSize,
+        };
+        SDL_Color rect_bg = {32, 32, 32, 255};
 
         SDL_SetRenderDrawColor(game->getRenderer(), rect_bg.r, rect_bg.g, rect_bg.b, rect_bg.a);
 
         SDL_RenderFillRect(game->getRenderer(), &rect);
 
-        pieceTextures[whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i])].draw(NULL, &rect);
+        pieceTextures[whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i])].drawCentered(rect);
     }
 }
 
@@ -304,11 +311,11 @@ void ChessGame::handleEvent(SDL_Event &e)
         int x, y;
         SDL_GetMouseState(&x, &y);
 
-        if (currentPlayer->isHuman() && board->isWaitingForPromotion())
+        if (playing && currentPlayer->isHuman() && board->isWaitingForPromotion())
         {
             handlePromotion(x, y);
         }
-        else if (currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
+        else if (playing && currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
         {
             // If player has clicked inside the board
             Coordinate board_coord{(x - wsize.leftOffset) / wsize.tileSize, (y - wsize.topOffset) / wsize.tileSize};
@@ -354,10 +361,16 @@ void ChessGame::renderPiece(Piece *piece)
 void ChessGame::handlePromotion(int x, int y)
 {
     WindowSize wsize = game->getWindowSize();
+    Coordinate pos = board->getPromotionPiece()->getPosition();
     bool whitePromotion = board->getPromotionPiece()->isWhite();
     for (int i = 0; i < 4; i++)
     {
-        SDL_Rect rect = {wsize.boardSize / 2 - (2 - i) * wsize.tileSize + wsize.leftOffset, wsize.boardSize / 2 - wsize.tileSize / 2, wsize.tileSize, wsize.tileSize};
+        SDL_Rect rect = {
+            wsize.leftOffset + pos.x * wsize.tileSize,
+            wsize.topOffset + ((whitePromotion ? 0 : 4) + i) * wsize.tileSize,
+            wsize.tileSize,
+            wsize.tileSize,
+        };
         if (hasClickedInsideButton(x, y, rect))
         {
             board->promoteTo(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]));
@@ -436,36 +449,54 @@ void ChessGame::playSound(MoveType mvtype)
 
 void ChessGame::update()
 {
-    if (!playing)
-        return;
-    Player *currentplayer = getCurrentPlayer();
-    if (!currentplayer->isHuman())
-    {
-        Move mv = currentplayer->getMove(board);
-
-        MoveType mvtype = board->performMove(mv);
-        playSound(mvtype);
-    }
-
     state = board->getGameState();
-    if (state != GameState::Playing)
+
+    if (playing && state != GameState::Playing)
     {
         playing = false;
         switch (state)
         {
         case GameState::WhiteWins:
         case GameState::BlackWins:
-            game->playSound(Sound::Victory);
+            // if both players are human or both players are bots
+            if (players[0]->isHuman() == players[1]->isHuman())
+            {
+                game->playSound(Sound::Victory);
+            }
+            else
+            {
+                bool whiteturn = board->getIsWhiteTurn();
+                if ((whiteturn && (state == GameState::WhiteWins)) || (!whiteturn && (state == GameState::BlackWins)))
+                {
+                    std::cout << "Defeat" << std::endl;
+                    game->playSound(Sound::Defeat);
+                }
+                else
+                {
+                    std::cout << "victory" << std::endl;
+                    game->playSound(Sound::Victory);
+                }
+            }
             break;
         case GameState::Draw:
         case GameState::Stalemate:
+            game->playSound(Sound::Draw);
         case GameState::WhiteResigns:
         case GameState::BlackResigns:
-            game->playSound(Sound::Draw);
+            game->playSound(Sound::Defeat);
             break;
         default:
             break;
         }
+    }
+
+    Player *currentplayer = getCurrentPlayer();
+    if (playing && !currentplayer->isHuman())
+    {
+        Move mv = currentplayer->getMove(board);
+
+        MoveType mvtype = board->performMove(mv);
+        playSound(mvtype);
     }
 }
 
@@ -488,17 +519,17 @@ void ChessGame::loadTextures()
     // Quit button texture
     quitButtonRect = {0, 0, 0, 0};
     quitTexture.setRenderer(renderer);
-    quitTexture.loadString("Quit", 24, color::RED);
+    quitTexture.loadString("Quit", 24, color::WHITE);
 
     // Resign button texture
     resignButtonRect = {0, 0, 0, 0};
     resignTexture.setRenderer(renderer);
-    resignTexture.loadString("Resign", 24, color::RED);
+    resignTexture.loadString("Resign", 24, color::WHITE);
 
     // Play again
     replayButtonRect = {0, 0, 0, 0};
     replayTexture.setRenderer(renderer);
-    replayTexture.loadString("Play Again", 24, color::RED);
+    replayTexture.loadString("Play Again", 24, color::WHITE);
 
     // Player names
     playerNameTextures[0].setRenderer(renderer);

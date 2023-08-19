@@ -11,6 +11,7 @@ enum class Sound
     Promote,
     Victory,
     Draw,
+    Defeat,
     ButtonClick,
     ___LAST // used to get total number of sounds
 };
