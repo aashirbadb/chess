@@ -485,7 +485,6 @@ MoveType Board::performMove(Move _move)
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
   Piece *capturePiece = endPiece;
-
   // check if there is a piece to move
   if (startPiece == nullptr)
     throw Error(ErrorCode::NoStartPiece);
