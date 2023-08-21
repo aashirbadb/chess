@@ -338,56 +338,18 @@ Piece *&Board::getPieceAt(Coordinate _coord)
 
 bool Board::isWhiteInCheck()
 {
-  bool whiteInCheck = false;
-
   if (whiteKing == nullptr)
     throw ErrorCode::WhiteKingNotFound;
 
-  std::vector<Piece *> blackPieces = getBlackPieces();
-
-  for (int i = 0; i < blackPieces.size(); i++)
-  {
-    if (whiteInCheck)
-      break;
-    std::vector<Move> moves = blackPieces[i]->getAllMoves(*this);
-    for (int j = 0; j < moves.size(); j++)
-    {
-      if (moves[j].end == whiteKing->getPosition())
-      {
-        whiteInCheck = true;
-        break;
-      }
-    }
-  }
-
-  return whiteInCheck;
+  return whiteKing->isInCheck(this);
 }
 
 bool Board::isBlackInCheck()
 {
-  bool blackInCheck = false;
-
   if (blackKing == nullptr)
     throw Error(ErrorCode::BlackKingNotFound);
 
-  std::vector<Piece *> whitePieces = getWhitePieces();
-
-  for (int i = 0; i < whitePieces.size(); i++)
-  {
-    std::vector<Move> moves = whitePieces[i]->getAllMoves(*this);
-    if (blackInCheck)
-      break;
-    for (int j = 0; j < moves.size(); j++)
-    {
-      if (moves[j].end == blackKing->getPosition())
-      {
-        blackInCheck = true;
-        break;
-      }
-    }
-  }
-
-  return blackInCheck;
+  return blackKing->isInCheck(this);
 }
 
 bool Board::isOpponentInCheck()
@@ -727,14 +689,14 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
     if (isUppercase(piece))
     {
       if (whiteKing == nullptr)
-        whiteKing = piece_ptr;
+        whiteKing = dynamic_cast<King *>(piece_ptr);
       else
         throw Error(ErrorCode::MultipleWhiteKing);
     }
     else
     {
       if (blackKing == nullptr)
-        blackKing = piece_ptr;
+        blackKing = dynamic_cast<King *>(piece_ptr);
       else
         throw Error(ErrorCode::MultipleBlackKing);
     }

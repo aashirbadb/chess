@@ -66,3 +66,44 @@ std::vector<Move> King::getAllMoves(Board &_board)
 
     return moves;
 }
+
+static const Coordinate KING_CHECK_LOOPING[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+static const Coordinate KING_CHECK_KNIGHT[] = {{1, 2}, {1, -2}, {-1, 2}, {-1, -2}, {2, 1}, {2, -1}, {-2, 1}, {-2, -1}};
+
+bool King::isInCheck(Board *_board)
+{
+
+    for (int i = 0; i < 8; i++)
+    {
+        Coordinate direction = KING_CHECK_LOOPING[i];
+        Coordinate next_position = {direction.x + position.x, direction.y + position.y};
+        while (next_position.isValidPosition())
+        {
+            if (isOpponentPieceAt(next_position, _board))
+            {
+                return true;
+            }
+            else if (isOwnPieceAt(next_position, _board))
+            {
+                break;
+            }
+
+            next_position = {next_position.x + direction.x,
+                             next_position.y + direction.y};
+        }
+    }
+
+    for (int i = 0; i < 8; i++)
+    {
+        Coordinate next_position = {position.x + KING_CHECK_KNIGHT[i].x, position.y + KING_CHECK_KNIGHT[i].y};
+        if (next_position.isValidPosition())
+        {
+            if (isOpponentPieceAt(next_position, _board))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

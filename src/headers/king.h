@@ -9,4 +9,6 @@ public:
     ~King();
     std::vector<Move> getAllMoves(Board &_board) override;
     char getSymbol() override;
+
+    bool isInCheck(Board *_board);
 };

@@ -11,6 +11,7 @@
 #include "piece.h"
 
 class Piece;
+class King;
 
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
@@ -50,8 +51,8 @@ private:
     int halfMoveClock;
     // The number of the full moves. It starts at 1 and is incremented after Black's move.
     int fullMoveClock;
-    Piece *whiteKing;
-    Piece *blackKing;
+    King *whiteKing;
+    King *blackKing;
 
     Piece *promotionPiece;
 
