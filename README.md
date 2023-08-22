@@ -26,7 +26,7 @@ cmake --build build
 
 ## Team members
 
-1. Aashirbad Bhandari(@aashirbadb)
-2. Alish Thapa(@Alishdaii)
-3. Arpit Pokhrel(@ArpitPokhrel)
-4. Bhumi Raj Sharma(@bhuwan856)
+1. Aashirbad Bhandari([@aashirbadb](https://github.com/aashirbadb))
+2. Alish Thapa([@Alishdaii](https://github.com/Alishdaii))
+3. Arpit Pokhrel([@ArpitPokhrel](https://github.com/ArpitPokhrel))
+4. Bhumi Raj Sharma([@bhuwan856](https://github.com/bhuwan856))
