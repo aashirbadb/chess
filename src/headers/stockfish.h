@@ -25,7 +25,7 @@ protected:
 class Stockfish : public Player
 {
     int level, search_tout;
-    static StockfishInstance STOCKFISH_INSTANCE;
+    static StockfishInstance *STOCKFISH_INSTANCE;
 
 public:
     Stockfish(int lvl = 10, int tout = 200);

@@ -96,12 +96,18 @@ void StockfishInstance::setLevel(int lvl)
 
 // ========= STOCKFISH =========
 
-StockfishInstance Stockfish::STOCKFISH_INSTANCE = StockfishInstance();
+StockfishInstance *Stockfish::STOCKFISH_INSTANCE = nullptr;
 
 Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
 {
     level = std::min(std::max(lvl, 0), 20);
     search_tout = tout;
+
+    // Initialize stockfish only when needed
+    if (STOCKFISH_INSTANCE == nullptr)
+    {
+        STOCKFISH_INSTANCE = new StockfishInstance();
+    }
 }
 
 Stockfish::~Stockfish() {}
@@ -112,8 +118,8 @@ Move Stockfish::getMove(Board *board)
     {
         try
         {
-            STOCKFISH_INSTANCE.setLevel(level);
-            return STOCKFISH_INSTANCE.getBestMove(board->toFEN(), search_tout);
+            STOCKFISH_INSTANCE->setLevel(level);
+            return STOCKFISH_INSTANCE->getBestMove(board->toFEN(), search_tout);
         }
         catch (const std::exception &e)
         {

@@ -18,6 +18,7 @@ Board::Board(Board &src)
 {
   whiteKing = nullptr;
   blackKing = nullptr;
+  promotionPiece = nullptr;
 
   for (int i = 0; i < 8; i++)
   {
@@ -56,7 +57,6 @@ Board::~Board()
 int Board::fromFEN(std::string fen)
 {
   using namespace std;
-  // cerr << "Parsing FEN: " << fen << endl;
 
   whiteKing = nullptr;
   blackKing = nullptr;
@@ -624,7 +624,6 @@ MoveType Board::performMove(Move _move)
   // check for draws
   if (halfMoveClock >= 50)
   {
-    std::cerr << "Draw!" << std::endl;
     state = GameState::Draw;
   }
 
@@ -637,14 +636,10 @@ MoveType Board::performMove(Move _move)
   if (allMoves.size() == 0 && isPlayerInCheck())
   {
     state = isWhiteTurn ? GameState::BlackWins : GameState::WhiteWins;
-    std::cerr << "Checkmate!\n"
-              << (isWhiteTurn ? "Black Wins!" : "White wins!") << std::endl;
   }
   else if (allMoves.size() == 0)
   {
     state = GameState::Stalemate;
-    std::cerr
-        << "Stalemate!" << std::endl;
   }
 
   previousMoves.push_back(_move);

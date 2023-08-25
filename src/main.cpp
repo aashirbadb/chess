@@ -3,23 +3,34 @@
 #include "headers/texture.h"
 #include "headers/ChessGameScene.h"
 #include "headers/board.h"
+#include "headers/test.h"
 
 int main(int argc, char **argv)
 {
     try
     {
-        Game game;
-        game.start();
-        Texture::clearTextures();
+        Test t;
+        t.perft(3);
     }
     catch (const Error &e)
     {
-        std::cerr << e.getError() << std::endl;
+        std::cerr << e.getError() << '\n';
     }
-    catch (const std::exception &e)
-    {
-        std::cerr << e.what() << '\n';
-    }
+
+    // try
+    // {
+    //     Game game;
+    //     game.start();
+    //     Texture::clearTextures();
+    // }
+    // catch (const Error &e)
+    // {
+    //     std::cerr << e.getError() << std::endl;
+    // }
+    // catch (const std::exception &e)
+    // {
+    //     std::cerr << e.what() << '\n';
+    // }
 
     return 0;
 }
