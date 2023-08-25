@@ -2,6 +2,7 @@
 #include "headers/game.h"
 #include "headers/texture.h"
 #include "headers/ChessGameScene.h"
+#include "headers/board.h"
 
 int main(int argc, char **argv)
 {

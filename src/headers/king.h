@@ -11,4 +11,6 @@ public:
     char getSymbol() override;
 
     bool isInCheck(Board *_board);
+    
+    static const Coordinate MOVE_DIRECTIONS[];
 };

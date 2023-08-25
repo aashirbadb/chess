@@ -9,4 +9,6 @@ public:
     ~Knight();
     std::vector<Move> getAllMoves(Board &_board) override;
     char getSymbol() override;
+
+    static const Coordinate MOVE_DIRECTIONS[];
 };

@@ -3,8 +3,6 @@
 #include "piece.h"
 #include "coordinate.h"
 
-const Coordinate QUEEN_MOVE_DIRECTIONS[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
-
 class Queen : public Piece
 {
 public:
@@ -12,4 +10,6 @@ public:
     ~Queen();
     std::vector<Move> getAllMoves(Board &_board) override;
     char getSymbol() override;
+
+    static const Coordinate MOVE_DIRECTIONS[];
 };

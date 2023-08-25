@@ -1,5 +1,7 @@
 #include "headers/bishop.h"
 
+const Coordinate Bishop::MOVE_DIRECTIONS[] = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+
 Bishop::Bishop(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
 }
@@ -19,7 +21,7 @@ std::vector<Move> Bishop::getAllMoves(Board &_board)
 
     for (int i = 0; i < 4; i++)
     {
-        Coordinate direction = BISHOP_MOVE_DIRECTIONS[i];
+        Coordinate direction = Bishop::MOVE_DIRECTIONS[i];
         Coordinate next_position = {direction.x + position.x, direction.y + position.y};
         while (next_position.isValidPosition())
         {
@@ -31,7 +33,9 @@ std::vector<Move> Bishop::getAllMoves(Board &_board)
             else if (_board.getPieceAt(next_position) == nullptr)
             {
                 moves.push_back(Move{position, next_position});
-            }else{
+            }
+            else
+            {
                 break;
             }
 

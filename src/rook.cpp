@@ -1,5 +1,7 @@
 #include "headers/rook.h"
 
+const Coordinate Rook::MOVE_DIRECTIONS[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+
 Rook::Rook(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
 }
@@ -19,7 +21,7 @@ std::vector<Move> Rook::getAllMoves(Board &_board)
 
     for (int i = 0; i < 4; i++)
     {
-        Coordinate direction = ROOK_MOVE_DIRECTIONS[i];
+        Coordinate direction = Rook::MOVE_DIRECTIONS[i];
         Coordinate next_position = {direction.x + position.x, direction.y + position.y};
         while (next_position.isValidPosition())
         {
@@ -31,7 +33,9 @@ std::vector<Move> Rook::getAllMoves(Board &_board)
             else if (_board.getPieceAt(next_position) == nullptr)
             {
                 moves.push_back(Move{position, next_position});
-            }else{
+            }
+            else
+            {
                 break;
             }
 

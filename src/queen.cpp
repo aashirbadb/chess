@@ -1,5 +1,6 @@
 #include "headers/queen.h"
 
+const Coordinate Queen::MOVE_DIRECTIONS[] = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 Queen::Queen(Coordinate _pos, bool _isColorWhite) : Piece(_pos, _isColorWhite)
 {
 }
@@ -19,7 +20,7 @@ std::vector<Move> Queen::getAllMoves(Board &_board)
 
     for (int i = 0; i < 8; i++)
     {
-        Coordinate direction = QUEEN_MOVE_DIRECTIONS[i];
+        Coordinate direction = Queen::MOVE_DIRECTIONS[i];
         Coordinate next_position = {direction.x + position.x, direction.y + position.y};
         while (next_position.isValidPosition())
         {
