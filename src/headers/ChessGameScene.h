@@ -29,10 +29,10 @@ class ChessGame : public GameScene
     SDL_Rect quitButtonRect;
     SDL_Rect resignButtonRect;
     SDL_Rect replayButtonRect;
+
 public:
     ChessGame(Game *g);
-    ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman);
-    ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, int difficulty);
+    ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, std::string fen = STARTING_FEN, int difficulty = 10);
 
     ~ChessGame() override;
     void render() override;

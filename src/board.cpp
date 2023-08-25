@@ -469,7 +469,7 @@ MoveType Board::performMove(Move _move)
   }
 
   if (!isValidMove)
-    throw Error(ErrorCode::InvalidMove);
+    throw Error(ErrorCode::InvalidMove, this->toFEN() + "\nMove: " + std::string(_move));
 
   // Store if pawn has moved two pieces
   // Used after move has been performed to set enpassant target square

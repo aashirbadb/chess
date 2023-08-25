@@ -27,7 +27,7 @@ namespace color
     const SDL_Color BLUE = {0, 0, 255, SDL_ALPHA_OPAQUE};
 
     const SDL_Color WHITE_TILE = WHITE;
-    const SDL_Color BLACK_TILE = {128,128,128,255};
+    const SDL_Color BLACK_TILE = {128, 128, 128, 255};
     const SDL_Color CHECK_TILE = RED;
     const SDL_Color SELECTED_TILE = GREEN;
     const SDL_Color MOVE_TILE = GREEN;
@@ -81,7 +81,7 @@ public:
     void playSound(Sound _sound);
 
     void pushScene(GameScene *sc);
-    GameScene *popScene();
+    void popScene();
     GameScene *currentScene();
 
     bool getMuted();

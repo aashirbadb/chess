@@ -110,11 +110,11 @@ bool King::isInCheck(Board *_board)
         {
             Piece *pc = _board->getPieceAt(next_position);
             char sy = tolower(pc != nullptr ? pc->getSymbol() : '\0');
-            if (isOpponentPieceAt(next_position, _board) && (sy == 'q' || sy == 'b'))
+            if (isOpponentPieceAt(next_position, _board) && ((sy == 'q') || (sy == 'b')))
             {
                 return true;
             }
-            else if (isOwnPieceAt(next_position, _board))
+            else if (pc != nullptr)
             {
                 break;
             }
@@ -133,11 +133,11 @@ bool King::isInCheck(Board *_board)
         {
             Piece *pc = _board->getPieceAt(next_position);
             char sy = tolower(pc != nullptr ? pc->getSymbol() : '\0');
-            if (isOpponentPieceAt(next_position, _board) && (sy == 'r' || sy == 'q'))
+            if (isOpponentPieceAt(next_position, _board) && ((sy == 'r') || (sy == 'q')))
             {
                 return true;
             }
-            else if (isOwnPieceAt(next_position, _board))
+            else if (pc != nullptr)
             {
                 break;
             }

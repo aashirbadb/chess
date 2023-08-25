@@ -12,6 +12,10 @@ int main(int argc, char **argv)
         game.start();
         Texture::clearTextures();
     }
+    catch (const Error &e)
+    {
+        std::cerr << e.getError() << std::endl;
+    }
     catch (const std::exception &e)
     {
         std::cerr << e.what() << '\n';

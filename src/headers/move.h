@@ -37,6 +37,14 @@ struct Move
                 promotion = str.at(4);
         }
     }
+
+    inline operator std::string()
+    {
+        std::string ret(start.getChessCoordinate());
+        ret.append(end.getChessCoordinate());
+        ret.push_back(promotion);
+        return ret;
+    }
 };
 
 inline std::ostream &operator<<(std::ostream &o, Move &m)

@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 #include <string>
+
 enum class ErrorCode
 {
     WhiteKingNotFound = 1,
@@ -22,6 +23,8 @@ class Error : public std::exception
 
 public:
     Error(ErrorCode _e) : code(_e) {}
+    Error(ErrorCode _e, std::string m) : code(_e), error(m) {}
+
     Error(std::string _err) : error(_err)
     {
         code = ErrorCode::Message;
@@ -77,5 +80,10 @@ public:
             return "Unknown error";
             break;
         }
+    }
+
+    std::string getError() const
+    {
+        return std::string(what()) + ": " + error;
     }
 };

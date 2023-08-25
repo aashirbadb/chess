@@ -27,7 +27,7 @@ Game::Game()
     Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     soundManager.init();
 
-    muted = false;
+    muted = true;
     scenes.push(new GameMenu(this));
 }
 
@@ -113,12 +113,11 @@ void Game::pushScene(GameScene *sc)
     scenes.push(sc);
 }
 
-GameScene *Game::popScene()
+void Game::popScene()
 {
     GameScene *temp = scenes.top();
+    temp->~GameScene();
     scenes.pop();
-
-    return temp;
 }
 
 GameScene *Game::currentScene()

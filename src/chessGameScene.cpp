@@ -15,27 +15,9 @@ ChessGame::ChessGame(Game *g) : GameScene(g)
     loadTextures();
 }
 
-ChessGame::ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman) : GameScene(g)
+ChessGame::ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, std::string fen, int difficulty) : GameScene(g)
 {
-    board = new Board();
-    selected_piece = nullptr;
-    if (isWhiteHuman)
-        players[0] = new Human("Player 1");
-    else
-        players[0] = new Stockfish(10);
-
-    if (isBlackHuman)
-        players[1] = new Human("Player 2");
-    else
-        players[1] = new Stockfish(10);
-
-    playing = true;
-    loadTextures();
-}
-
-ChessGame::ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, int difficulty) : GameScene(g)
-{
-    board = new Board();
+    board = new Board(fen);
     selected_piece = nullptr;
     if (isWhiteHuman)
         players[0] = new Human("Player 1");
