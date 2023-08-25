@@ -15,7 +15,7 @@ ChessGame::ChessGame(Game *g) : GameScene(g)
     loadTextures();
 }
 
-ChessGame::ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, std::string fen, int difficulty) : GameScene(g)
+ChessGame::ChessGame(Game *g, bool isWhiteHuman = true, bool isBlackHuman = true, std::string fen, int difficulty) : GameScene(g)
 {
     board = new Board(fen);
     selected_piece = nullptr;

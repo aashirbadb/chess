@@ -6,20 +6,30 @@
 #include "player.h"
 #include "board.h"
 
-// https://disservin.github.io/stockfish-docs/pages/Commands.html
-class Stockfish : public Player, private Communication::Process
+class StockfishInstance : private Communication::Process
 {
-    int level;
-    int search_tout;
-
 public:
-    Stockfish(int lvl, int tout = 20);
-    ~Stockfish() override;
+    StockfishInstance();
+    ~StockfishInstance() override;
 
-    Move getBestMove(std::string fen);
-    Move getMove(Board *board) override;
+    Move getBestMove(std::string fen, int tout);
+    bool isReady();
+    void setOption(std::string option, std::string value);
+    void setLevel(int lvl);
 
 protected:
-    bool isReady();
     void write(std::string str);
+};
+
+// https://disservin.github.io/stockfish-docs/pages/Commands.html
+class Stockfish : public Player
+{
+    int level, search_tout;
+    static StockfishInstance STOCKFISH_INSTANCE;
+
+public:
+    Stockfish(int lvl = 10, int tout = 200);
+    ~Stockfish();
+
+    Move getMove(Board *board) override;
 };

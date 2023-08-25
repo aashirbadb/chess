@@ -1,14 +1,11 @@
 #include "headers/stockfish.h"
 #include <iostream>
 
-#include <SDL2/SDL.h>
-
-Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
+// ========= STOCKFISH INSTANCE =========
+StockfishInstance::StockfishInstance()
 {
-    level = std::min(std::max(lvl, 0), 20);
-    search_tout = tout;
-
-    std::cerr << "Initializing Stockfish" << std::endl;
+    std::cerr
+        << "Initializing Stockfish" << std::endl;
 
 #ifdef _WIN64
     this->initProcess("assets/stockfish-windows.exe");
@@ -18,16 +15,6 @@ Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
 
     write("uci");
     this->readProcess("uciok", 1000);
-
-    // To set an option:
-    // setoption name <name> value <value>
-
-    // Limit to specific Elo
-    // write("setoption name UCI_LimitStrength value true");
-    // write("setoption name UCI_Elo value "); // type spin default 1320 min 1320 max 3190
-
-    // Limit to a specific skill level
-    write("setoption name Skill Level value " + std::to_string(lvl)); // Skill Level (0-20)
 
     write("ucinewgame");
 
@@ -39,17 +26,17 @@ Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
     std::cerr << "Stockfish initialized" << std::endl;
 }
 
-Stockfish::~Stockfish()
+StockfishInstance::~StockfishInstance()
 {
     killProcess();
 }
 
-void Stockfish::write(std::string str)
+void StockfishInstance::write(std::string str)
 {
     writeProcess(str + "\n");
 }
 
-bool Stockfish::isReady()
+bool StockfishInstance::isReady()
 {
     write("isready");
     readProcess("readyok", 50);
@@ -57,27 +44,12 @@ bool Stockfish::isReady()
     return !timeout();
 }
 
-Move Stockfish::getMove(Board *board)
-{
-    for (int i = 0; i < 3; i++)
-    {
-        try
-        {
-            return getBestMove(board->toFEN());
-        }
-        catch (const std::exception &e)
-        {
-            std::cerr << e.what() << '\n';
-        }
-    }
-}
-
-Move Stockfish::getBestMove(std::string fen)
+Move StockfishInstance::getBestMove(std::string fen, int tout = 1000)
 {
     write("position fen " + fen);
     write("go depth 30");
 
-    std::vector<std::string> data = readProcess("bestmove", search_tout);
+    std::vector<std::string> data = readProcess("bestmove", tout);
     if (timeout())
     {
         // stop searching if timeout was reached and return get the bestmove from there
@@ -104,5 +76,48 @@ Move Stockfish::getBestMove(std::string fen)
     else
     {
         throw Error("Could not find best move");
+    }
+}
+
+// To set an option:
+// setoption name <name> value <value>
+
+// Limit to specific Elo
+// write("setoption name UCI_LimitStrength value true");
+// write("setoption name UCI_Elo value "); // type spin default 1320 min 1320 max 3190
+void StockfishInstance::setOption(std::string option, std::string value)
+{
+    write("setoption name " + option + " value " + value);
+}
+void StockfishInstance::setLevel(int lvl)
+{
+    write("setoption name Skill Level value " + std::to_string(lvl)); // Skill Level (0-20)
+}
+
+// ========= STOCKFISH =========
+
+StockfishInstance Stockfish::STOCKFISH_INSTANCE = StockfishInstance();
+
+Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
+{
+    level = std::min(std::max(lvl, 0), 20);
+    search_tout = tout;
+}
+
+Stockfish::~Stockfish() {}
+
+Move Stockfish::getMove(Board *board)
+{
+    for (int i = 0; i < 3; i++)
+    {
+        try
+        {
+            STOCKFISH_INSTANCE.setLevel(level);
+            return STOCKFISH_INSTANCE.getBestMove(board->toFEN(), search_tout);
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << e.what() << '\n';
+        }
     }
 }
