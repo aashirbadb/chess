@@ -9,8 +9,7 @@ int main(int argc, char **argv)
 {
     try
     {
-        Test t;
-        t.perft(3);
+        Test::multiplePerfts();
     }
     catch (const Error &e)
     {

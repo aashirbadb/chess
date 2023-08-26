@@ -1,6 +1,7 @@
 #include "headers/board.h"
 #include <iomanip>
 #include <stdlib.h>
+#include <algorithm>
 #include "headers/errors.h"
 #include "headers/utils.h"
 
@@ -756,7 +757,12 @@ std::vector<Move> Board::getAllPlayerLegalMoves(bool _white)
     std::vector<Move> movesForPiece = allpieces[i]->getLegalMoves(*this);
     for (int j = 0; j < movesForPiece.size(); j++)
     {
-      allMoves.push_back(movesForPiece[j]);
+      // Don't push duplicates
+      // TODO: Use sets/maps or something to speed this up
+      if (std::find(allMoves.begin(), allMoves.end(), movesForPiece[j]) == allMoves.end())
+      {
+        allMoves.push_back(movesForPiece[j]);
+      }
     }
   }
 
@@ -767,7 +773,6 @@ Coordinate Board::getEnpassantTarget()
 {
   return enPassantTarget;
 }
-
 void Board::setPlayerTurn(bool _turn)
 {
   isWhiteTurn = _turn;

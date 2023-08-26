@@ -35,12 +35,12 @@ struct Coordinate
         }
     }
 
-    bool isValidPosition()
+    bool isValidPosition() const
     {
         return x >= 0 && x < 8 && y >= 0 && y < 8;
     }
 
-    char *getChessCoordinate()
+    char *getChessCoordinate() const
     {
         char *coord = new char[3];
         coord[0] = 'a' + x;
@@ -49,7 +49,7 @@ struct Coordinate
         return coord;
     }
 
-    bool isPromotionSquare(bool isWhitePiece)
+    bool isPromotionSquare(bool isWhitePiece) const
     {
         if ((isWhitePiece && y == 0) || (!isWhitePiece && y == 7))
         {
@@ -60,9 +60,24 @@ struct Coordinate
             return false;
         }
     }
+
+    bool operator<(const Coordinate &other) const
+    {
+        return (x < other.x) ? true : (y < other.y);
+    }
+
+    inline bool operator==(const Coordinate &a) const
+    {
+        return (a.x == x && a.y == y);
+    }
+
+    inline bool operator!=(const Coordinate &a) const
+    {
+        return !(a == *this);
+    }
 };
 
-inline std::ostream &operator<<(std::ostream &o, Coordinate &c)
+inline std::ostream &operator<<(std::ostream &o, const Coordinate &c)
 {
     if (c.isValidPosition())
     {
@@ -76,14 +91,4 @@ inline std::ostream &operator<<(std::ostream &o, Coordinate &c)
     }
 
     return o;
-}
-
-inline bool operator==(Coordinate a, Coordinate b)
-{
-    return (a.x == b.x && a.y == b.y);
-}
-
-inline bool operator!=(Coordinate a, Coordinate b)
-{
-    return !(a == b);
 }
