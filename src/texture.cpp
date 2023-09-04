@@ -1,5 +1,4 @@
 #include "headers/texture.h"
-#include <iostream>
 
 FontMap Texture::FONTS;
 

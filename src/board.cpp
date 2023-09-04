@@ -1,9 +1,10 @@
 #include "headers/board.h"
-#include <iomanip>
-#include <stdlib.h>
-#include <algorithm>
-#include "headers/errors.h"
-#include "headers/utils.h"
+#include "headers/king.h"
+#include "headers/queen.h"
+#include "headers/rook.h"
+#include "headers/bishop.h"
+#include "headers/knight.h"
+#include "headers/pawn.h"
 
 Board::Board()
 {
@@ -386,27 +387,34 @@ void Board::moveUnchecked(Move _move)
 {
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
+  if (_move.isUnknown())
+  {
+    _move.movetype = getMovetype(_move);
+  }
 
   if (startPiece == nullptr)
   {
     throw Error(ErrorCode::NoStartPiece);
   }
 
-  if (isEnpassant(this, _move))
+  if (_move.isEnpassant())
   {
     getPieceAt({_move.end.x, _move.start.y}) = nullptr; // capture opponent piece
   }
 
-  bool kingsidec = isKingSideCastle(this, _move);
-  bool queensidec = isQueenSideCastle(this, _move);
-
-  if (kingsidec != 0 || queensidec != 0) // Handles casting
+  // Castling
+  if (_move.isKingSideCastle() || _move.isQueenSideCastle())
   {
     int tempy = isWhiteTurn ? 7 : 0;
-    Piece *king = getPieceAt({4, tempy});
-    if (kingsidec == 1)
+    King *king = isWhiteTurn ? whiteKing : blackKing;
+    if (king->getPosition() != Coordinate{4, tempy})
+      throw Error("Attempting to perform castle when king is not in starting position");
+
+    if (_move.isKingSideCastle()) // kingside castle
     {
       Piece *rook = getPieceAt({7, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
 
       getPieceAt({4, tempy}) = nullptr; // remove king
       getPieceAt({7, tempy}) = nullptr; // remove rook
@@ -415,10 +423,12 @@ void Board::moveUnchecked(Move _move)
       rook->updateCoordinate({5, tempy});
       king->updateCoordinate({6, tempy});
     }
-
-    if (queensidec == 1)
+    else if (_move.isQueenSideCastle()) // queenside castle
     {
       Piece *rook = getPieceAt({0, tempy});
+      if (rook == nullptr)
+        throw Error("Attempting to perform castle when rook is not in starting position");
+
       getPieceAt({0, tempy}) = nullptr; // remove rook
       getPieceAt({2, tempy}) = king;    // place king
       getPieceAt({3, tempy}) = rook;    // place rook
@@ -429,7 +439,6 @@ void Board::moveUnchecked(Move _move)
   }
   else
   {
-
     // Move directly
     getPieceAt(_move.start) = nullptr;
     getPieceAt(_move.end) = startPiece;
@@ -439,6 +448,12 @@ void Board::moveUnchecked(Move _move)
 
 MoveType Board::performMove(Move _move)
 {
+  // If movetype is unknown(user input or stockfish results, then calculate it)
+  if (_move.isUnknown())
+  {
+    _move.movetype = getMovetype(_move);
+  }
+
   // Disallow moving if a promotion is pending
   if (isWaitingForPromotion())
   {
@@ -456,7 +471,7 @@ MoveType Board::performMove(Move _move)
   if (!isCorrectTurn)
     throw Error(ErrorCode::IncorrectTurn);
 
-  std::vector<Move> moves = startPiece->getLegalMoves(*this);
+  std::vector<Move> moves = startPiece->getLegalMoves(this);
   bool isValidMove = false;
 
   // Check if the move is valid
@@ -472,22 +487,17 @@ MoveType Board::performMove(Move _move)
   if (!isValidMove)
     throw Error(ErrorCode::InvalidMove, this->toFEN() + "\nMove: " + std::string(_move));
 
-  // Store if pawn has moved two pieces
-  // Used after move has been performed to set enpassant target square
-  bool pawntwomoves = isPawnTwoMovesAhead(this, _move);
-  bool kingsidec = isKingSideCastle(this, _move);
-  bool queensidec = isQueenSideCastle(this, _move);
   MoveType mvType = MoveType::Normal;
 
   // Move the pieces
-  if (kingsidec != 0 || queensidec != 0) // Handles casting
+  if (_move.isKingSideCastle() || _move.isQueenSideCastle())
   {
     int tempy = isWhiteTurn ? 7 : 0;
-    Piece *king = getPieceAt({4, tempy});
-    if (king == nullptr)
+    King *king = isWhiteTurn ? whiteKing : blackKing;
+    if (king->getPosition() != Coordinate{4, tempy})
       throw Error("Attempting to perform castle when king is not in starting position");
 
-    if (kingsidec == 1)
+    if (_move.isKingSideCastle()) // kingside castle
     {
       Piece *rook = getPieceAt({7, tempy});
       if (rook == nullptr)
@@ -500,8 +510,7 @@ MoveType Board::performMove(Move _move)
       rook->updateCoordinate({5, tempy});
       king->updateCoordinate({6, tempy});
     }
-
-    if (queensidec == 1)
+    else if (_move.isQueenSideCastle()) // queenside castle
     {
       Piece *rook = getPieceAt({0, tempy});
       if (rook == nullptr)
@@ -514,16 +523,12 @@ MoveType Board::performMove(Move _move)
       rook->updateCoordinate({3, tempy});
       king->updateCoordinate({2, tempy});
     }
-
-    if (kingsidec == 1 || queensidec == 1)
-    {
-      int offset = isWhiteTurn ? 0 : 2;
-      canCastle[offset] = false;
-      canCastle[offset + 1] = false;
-      mvType = MoveType::Castle;
-    }
+    int offset = isWhiteTurn ? 0 : 2;
+    canCastle[offset] = false;
+    canCastle[offset + 1] = false;
+    mvType = MoveType::Castle;
   }
-  else if (isEnpassant(this, _move))
+  else if (_move.isEnpassant())
   {
     int direction = isWhiteTurn ? 1 : -1;
     Coordinate captureCoord = {_move.end.x, _move.start.y};
@@ -538,7 +543,7 @@ MoveType Board::performMove(Move _move)
 
     mvType = MoveType::Enpassant;
   }
-  else if (isPromotion(this, _move)) // Handles promotion
+  else if (_move.isPromotion()) // Handles promotion
   {
     getPieceAt(_move.start) = nullptr;
     getPieceAt(_move.end) = startPiece;
@@ -558,7 +563,7 @@ MoveType Board::performMove(Move _move)
     getPieceAt(_move.end) = startPiece;
     getPieceAt(_move.end)->updateCoordinate(_move.end);
 
-    if (isCapture(this, _move))
+    if (_move.isCapture())
     {
       mvType = MoveType::Capture;
     }
@@ -571,7 +576,7 @@ MoveType Board::performMove(Move _move)
 
   // Set enpassant target if pawn has moved two moves ahead
   // Otherwise reset enpassant target square
-  if (pawntwomoves)
+  if (_move.isPawnTwoMovesAhead())
   {
     int direction = isWhiteTurn ? 1 : -1;
     enPassantTarget = {_move.end.x, _move.end.y + direction};
@@ -587,7 +592,7 @@ MoveType Board::performMove(Move _move)
 
   // Halfmove clock increments every piece but resets when there is pawn movement or capture
   // Otherwise increment it by one
-  if (tolower(startPiece->getSymbol()) == 'p' || isCapture(this, _move))
+  if (tolower(startPiece->getSymbol()) == 'p' || _move.isCapture())
     halfMoveClock = 0;
   else
     halfMoveClock++;
@@ -656,33 +661,33 @@ Piece *Board::createPiece(Coordinate _pos, char piece)
   {
   case 'p':
   case 'P':
-    piece_ptr = new Pawn({_pos.x, _pos.y}, isUppercase(piece));
+    piece_ptr = new Pawn({_pos.x, _pos.y}, isupper(piece));
     break;
 
   case 'r':
   case 'R':
-    piece_ptr = new Rook({_pos.x, _pos.y}, isUppercase(piece));
+    piece_ptr = new Rook({_pos.x, _pos.y}, isupper(piece));
     break;
 
   case 'n':
   case 'N':
-    piece_ptr = new Knight({_pos.x, _pos.y}, isUppercase(piece));
+    piece_ptr = new Knight({_pos.x, _pos.y}, isupper(piece));
     break;
 
   case 'b':
   case 'B':
-    piece_ptr = new Bishop({_pos.x, _pos.y}, isUppercase(piece));
+    piece_ptr = new Bishop({_pos.x, _pos.y}, isupper(piece));
     break;
 
   case 'q':
   case 'Q':
-    piece_ptr = new Queen({_pos.x, _pos.y}, isUppercase(piece));
+    piece_ptr = new Queen({_pos.x, _pos.y}, isupper(piece));
     break;
 
   case 'k':
   case 'K':
-    piece_ptr = new King({_pos.x, _pos.y}, isUppercase(piece));
-    if (isUppercase(piece))
+    piece_ptr = new King({_pos.x, _pos.y}, isupper(piece));
+    if (isupper(piece))
     {
       if (whiteKing == nullptr)
         whiteKing = dynamic_cast<King *>(piece_ptr);
@@ -736,7 +741,7 @@ std::vector<Move> Board::getAllPlayerMoves(bool _white)
 
   for (int i = 0; i < allpieces.size(); i++)
   {
-    std::vector<Move> movesForPiece = allpieces[i]->getAllMoves(*this);
+    std::vector<Move> movesForPiece = allpieces[i]->getAllMoves(this);
     for (int j = 0; j < movesForPiece.size(); j++)
     {
       allMoves.push_back(movesForPiece[j]);
@@ -754,11 +759,10 @@ std::vector<Move> Board::getAllPlayerLegalMoves(bool _white)
 
   for (int i = 0; i < allpieces.size(); i++)
   {
-    std::vector<Move> movesForPiece = allpieces[i]->getLegalMoves(*this);
+    std::vector<Move> movesForPiece = allpieces[i]->getLegalMoves(this);
     for (int j = 0; j < movesForPiece.size(); j++)
     {
       // Don't push duplicates
-      // TODO: Use sets/maps or something to speed this up
       if (std::find(allMoves.begin(), allMoves.end(), movesForPiece[j]) == allMoves.end())
       {
         allMoves.push_back(movesForPiece[j]);
@@ -885,4 +889,92 @@ std::vector<Piece *> Board::getCapturedPieces(bool _whitePiece)
   }
 
   return pcs;
+}
+
+int Board::getMovetype(Move _move)
+{
+  Piece *startPiece = this->getPieceAt(_move.start);
+  int mvtype = MOVETYPE_NONE;
+  if (startPiece == nullptr)
+  {
+    throw Error(ErrorCode::NoStartPiece);
+  }
+
+  // Capture
+  if (startPiece->isOpponentPieceAt(_move.end, this))
+  {
+    mvtype |= MOVETYPE_CAPTURE;
+  }
+
+  // Promotion
+  if (toupper(startPiece->getSymbol()) == 'P' && _move.end.isPromotionSquare(isupper(startPiece->getSymbol())))
+  {
+    mvtype |= MOVETYPE_PROMOTION;
+  }
+
+  // Kingside castle
+  if (tolower(startPiece->getSymbol()) == 'k' &&
+      _move.start.x == 4 &&
+      (_move.end.x == 6 || _move.end.x == 7) &&
+      !this->isPlayerInCheck())
+  {
+    bool allowed = true;
+    std::vector<Move> moves = this->getAllPlayerMoves(!startPiece->isWhite());
+    int tempy = this->getIsWhiteTurn() ? 7 : 0;
+    // if any of the opponent's pieces attacks the path of the king when castling, it is not allowed
+    for (int i = 0; i < moves.size(); i++)
+    {
+      if (moves[i].end == Coordinate{5, tempy} || moves[i].end == Coordinate{6, tempy})
+      {
+        allowed = false;
+        break;
+      }
+    }
+
+    if (allowed)
+    {
+      mvtype |= MOVETYPE_KINGSIDE_CASTLE;
+    }
+  }
+
+  // Queenside castle
+  if (tolower(startPiece->getSymbol()) == 'k' &&
+      _move.start.x == 4 &&
+      (_move.end.x == 0 || _move.end.x == 2) &&
+      !this->isPlayerInCheck())
+  {
+
+    std::vector<Move> moves = this->getAllPlayerMoves(!startPiece->isWhite());
+    bool allowed = true;
+    int tempy = this->getIsWhiteTurn() ? 7 : 0;
+    for (int i = 0; i < moves.size(); i++)
+    {
+      if (moves[i].end == Coordinate{2, tempy} || moves[i].end == Coordinate{3, tempy})
+      {
+        allowed = false;
+        break;
+      }
+    }
+
+    if (allowed)
+    {
+      mvtype |= MOVETYPE_QUEENSIDE_CASTLE;
+    }
+  }
+
+  // Pawn two moves
+  if (((startPiece != nullptr) &&
+       (tolower(startPiece->getSymbol()) == 'p') &&
+       (abs(_move.end.y - _move.start.y) == 2)))
+  {
+    mvtype |= MOVETYPE_PAWN_TWOMOVES;
+  }
+
+  // En passant
+  if ((tolower(startPiece->getSymbol()) == 'p' && _move.end == this->getEnpassantTarget()))
+  {
+    mvtype |= MOVETYPE_ENPASSANT;
+  }
+
+  return mvtype;
 }

@@ -1,11 +1,20 @@
 #pragma once
-#include "gameScene.h"
-#include "board.h"
-#include "piece.h"
-#include "stockfish.h"
-#include "player.h"
+#include <vector>
 #include <unordered_map>
-#include "gameMenu.h"
+#include <iostream>
+#include <SDL2/SDL.h>
+
+class Board;
+class Piece;
+
+enum class GameState;
+
+#include "texture.h"
+#include "player.h"
+#include "coordinate.h"
+#include "gameScene.h"
+
+#include "board.h"
 
 class ChessGame : public GameScene
 {
@@ -31,8 +40,7 @@ class ChessGame : public GameScene
     SDL_Rect replayButtonRect;
 
 public:
-    ChessGame(Game *g);
-    ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, std::string fen = STARTING_FEN, int difficulty = 10);
+    ChessGame(Game *g, bool isWhiteHuman = true, bool isBlackHuman = true, std::string fen = STARTING_FEN, int difficulty = 10);
 
     ~ChessGame() override;
     void render() override;

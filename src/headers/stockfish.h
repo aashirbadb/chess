@@ -1,7 +1,9 @@
 #pragma once
+#include <string>
+#include <iostream>
+
 #include "communication.hpp"
 #include "move.h"
-#include <string>
 #include "errors.h"
 #include "player.h"
 #include "board.h"
@@ -28,7 +30,7 @@ class Stockfish : public Player
     static StockfishInstance *STOCKFISH_INSTANCE;
 
 public:
-    Stockfish(int lvl = 10, int tout = 200);
+    Stockfish(int lvl = 10, int tout = 20);
     ~Stockfish();
 
     Move getMove(Board *board) override;

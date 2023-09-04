@@ -7,7 +7,7 @@ class Knight : public Piece
 public:
     Knight(Coordinate _pos, bool _isWhite);
     ~Knight();
-    std::vector<Move> getAllMoves(Board &_board) override;
+    std::vector<Move> getAllMoves(Board *_board) override;
     char getSymbol() override;
 
     static const Coordinate MOVE_DIRECTIONS[];

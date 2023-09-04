@@ -22,6 +22,6 @@ public:
     // This is handled by the UI
     Move getMove(Board *board) override
     {
-        return {{-1, -1}, {-1, -1}};
+        return {{-1, -1}, {-1, -1}, MOVETYPE_UNKNOWN};
     }
 };

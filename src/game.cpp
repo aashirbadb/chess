@@ -1,11 +1,8 @@
-#include <iostream>
-#include <SDL2/SDL_blendmode.h>
-#include <SDL2/SDL_mixer.h>
 #include "headers/game.h"
-#include "headers/gameMenu.h"
 
 Game::Game()
 {
+    srand(time(0));
     quit = false;
 
     SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS);
@@ -54,29 +51,31 @@ void Game::start()
     {
         Uint64 start = SDL_GetTicks64();
 
-        SDL_PollEvent(&event);
-
-        // SDL_WaitEvent(&event);
-        switch (event.type)
+        // Handle all queued events before moving on
+        // Fixes input issues when two engines are playing
+        while (SDL_PollEvent(&event))
         {
-        case SDL_QUIT:
-            quit = true;
-            break;
+            switch (event.type)
+            {
+            case SDL_QUIT:
+                quit = true;
+                break;
 
-        case SDL_WINDOWEVENT:
-            calculateWindowSize();
-            scenes.top()->handleResize();
-            break;
+            case SDL_WINDOWEVENT:
+                calculateWindowSize();
+                scenes.top()->handleResize();
+                break;
 
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEMOTION:
-        case SDL_MOUSEBUTTONUP:
-        case SDL_MOUSEWHEEL:
-            scenes.top()->handleEvent(event);
-            break;
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEMOTION:
+            case SDL_MOUSEBUTTONUP:
+            case SDL_MOUSEWHEEL:
+                scenes.top()->handleEvent(event);
+                break;
 
-        default:
-            break;
+            default:
+                break;
+            }
         }
 
         // No need to render if user has quit
@@ -94,7 +93,7 @@ void Game::start()
         float elapsedMS = (end - start);
 
         // Cap to 60 FPS
-        SDL_Delay(std::max((long int)(1000 / FPS - elapsedMS), (long int)0));
+        // SDL_Delay(std::max((long int)(1000 / FPS - elapsedMS), (long int)0));
     }
 }
 

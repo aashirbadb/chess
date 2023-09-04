@@ -1,6 +1,8 @@
-#include "headers/texture.h"
 #include "headers/gameMenu.h"
+#include "headers/texture.h"
+#include "headers/gameScene.h"
 #include "headers/ChessGameScene.h"
+#include "headers/game.h"
 
 GameMenu::GameMenu(Game *g) : GameScene(g)
 {

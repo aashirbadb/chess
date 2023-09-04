@@ -1,17 +1,18 @@
 #pragma once
+#include <iomanip>
+#include <stdlib.h>
+#include <algorithm>
 #include <iostream>
 #include <vector>
-#include "pawn.h"
-#include "rook.h"
-#include "knight.h"
-#include "bishop.h"
-#include "queen.h"
-#include "king.h"
-#include "coordinate.h"
-#include "piece.h"
+#include <string>
 
 class Piece;
 class King;
+
+#include "errors.h"
+#include "piece.h"
+#include "coordinate.h"
+#include "move.h"
 
 // <pieces(rows are separated by /)> <turn> <castling availibility> <En passant target square> <Halfmove clock> <Fullmove number>
 const std::string EMPTY_FEN = std::string("8/8/8/8/8/8/8/8 w KQkq - 0 1");
@@ -63,16 +64,16 @@ public:
     Board();
     ~Board();
 
-    Board(std::string fen);
-    Board(Board &_board);
+    Board(std::string);
+    Board(Board &);
 
-    int fromFEN(std::string fen);
+    int fromFEN(std::string);
     std::string toFEN();
 
     void display();
     void display_meta();
 
-    bool getBoardColorAt(int _x, int _y);
+    bool getBoardColorAt(int, int);
 
     bool getIsWhiteTurn();
 
@@ -84,8 +85,8 @@ public:
     bool isOpponentInCheck();
     bool isPlayerInCheck();
 
-    std::vector<Move> getAllPlayerMoves(bool _white);
-    std::vector<Move> getAllPlayerLegalMoves(bool _white);
+    std::vector<Move> getAllPlayerMoves(bool);
+    std::vector<Move> getAllPlayerLegalMoves(bool);
 
     bool castlingAvailable(char _type);
 
@@ -114,4 +115,6 @@ public:
     void undoLastMove();
 
     void resign();
+
+    int getMovetype(Move _move);
 };

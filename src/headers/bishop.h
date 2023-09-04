@@ -1,14 +1,16 @@
 #pragma once
-#include "piece.h"
 #include "board.h"
+#include "piece.h"
 #include "move.h"
+
+class Piece;
 
 class Bishop : public Piece
 {
 public:
-    Bishop(Coordinate _pos, bool _isWhite);
+    Bishop(Coordinate, bool);
     ~Bishop();
-    std::vector<Move> getAllMoves(Board &_board) override;
+    std::vector<Move> getAllMoves(Board *) override;
     char getSymbol() override;
 
     static const Coordinate MOVE_DIRECTIONS[];

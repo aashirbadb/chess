@@ -1,8 +1,11 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include "board.h"
+#include <fstream>
+#include <assert.h>
 #include <chrono>
+
+#include "board.h"
 #include "move.h"
 
 class Test

@@ -8,7 +8,7 @@ class Queen : public Piece
 public:
     Queen(Coordinate _pos, bool _isWhite);
     ~Queen();
-    std::vector<Move> getAllMoves(Board &_board) override;
+    std::vector<Move> getAllMoves(Board *_board) override;
     char getSymbol() override;
 
     static const Coordinate MOVE_DIRECTIONS[];

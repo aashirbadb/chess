@@ -7,29 +7,29 @@
 
 int main(int argc, char **argv)
 {
-    try
-    {
-        Test::multiplePerfts();
-    }
-    catch (const Error &e)
-    {
-        std::cerr << e.getError() << '\n';
-    }
-
     // try
     // {
-    //     Game game;
-    //     game.start();
-    //     Texture::clearTextures();
+    //     Test::multiplePerfts();
     // }
     // catch (const Error &e)
     // {
-    //     std::cerr << e.getError() << std::endl;
+    //     std::cerr << e.getError() << '\n';
     // }
-    // catch (const std::exception &e)
-    // {
-    //     std::cerr << e.what() << '\n';
-    // }
+
+    try
+    {
+        Game game;
+        game.start();
+        Texture::clearTextures();
+    }
+    catch (const Error &e)
+    {
+        std::cerr << e.getError() << std::endl;
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << e.what() << '\n';
+    }
 
     return 0;
 }

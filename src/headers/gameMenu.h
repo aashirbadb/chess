@@ -1,5 +1,8 @@
 #pragma once
+#include <SDL2/SDL.h>
+
 #include "gameScene.h"
+#include "texture.h"
 
 class GameMenu : public GameScene
 {

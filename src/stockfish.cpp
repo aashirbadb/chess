@@ -1,5 +1,4 @@
 #include "headers/stockfish.h"
-#include <iostream>
 
 // ========= STOCKFISH INSTANCE =========
 StockfishInstance::StockfishInstance()
@@ -47,9 +46,10 @@ bool StockfishInstance::isReady()
 Move StockfishInstance::getBestMove(std::string fen, int tout = 1000)
 {
     write("position fen " + fen);
-    write("go depth 30");
+    // write("go depth 30");
+    write("go movetime tout");
 
-    std::vector<std::string> data = readProcess("bestmove", tout);
+    std::vector<std::string> data = readProcess("bestmove", tout+10);
     if (timeout())
     {
         // stop searching if timeout was reached and return get the bestmove from there
@@ -119,7 +119,9 @@ Move Stockfish::getMove(Board *board)
         try
         {
             STOCKFISH_INSTANCE->setLevel(level);
-            return STOCKFISH_INSTANCE->getBestMove(board->toFEN(), search_tout);
+            Move bestmove = STOCKFISH_INSTANCE->getBestMove(board->toFEN(), search_tout);
+            bestmove.movetype = board->getMovetype(bestmove);
+            return bestmove;
         }
         catch (const std::exception &e)
         {

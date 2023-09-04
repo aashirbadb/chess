@@ -15,7 +15,7 @@ char Rook::getSymbol()
     return isColorWhite ? 'R' : 'r';
 }
 
-std::vector<Move> Rook::getAllMoves(Board &_board)
+std::vector<Move> Rook::getAllMoves(Board *_board)
 {
     std::vector<Move> moves;
 
@@ -25,14 +25,14 @@ std::vector<Move> Rook::getAllMoves(Board &_board)
         Coordinate next_position = {direction.x + position.x, direction.y + position.y};
         while (next_position.isValidPosition())
         {
-            if (isOpponentPieceAt(next_position, &_board))
+            if (isOpponentPieceAt(next_position, _board))
             {
-                moves.push_back(Move{position, next_position});
+                moves.push_back(Move{position, next_position, MOVETYPE_CAPTURE});
                 break;
             }
-            else if (_board.getPieceAt(next_position) == nullptr)
+            else if (_board->getPieceAt(next_position) == nullptr)
             {
-                moves.push_back(Move{position, next_position});
+                moves.push_back(Move{position, next_position, MOVETYPE_NONE});
             }
             else
             {

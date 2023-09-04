@@ -1,5 +1,4 @@
 #include "headers/sound.h"
-#include <iostream>
 
 std::unordered_map<Sound, Mix_Chunk *> SoundManager::SOUNDS;
 

@@ -1,6 +1,4 @@
 #pragma once
-#include "game.h"
-#include "texture.h"
 #include <SDL2/SDL.h>
 
 class Game;

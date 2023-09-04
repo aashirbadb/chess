@@ -9,7 +9,7 @@ class Rook : public Piece
 public:
     Rook(Coordinate _pos, bool _isWhite);
     ~Rook();
-    std::vector<Move> getAllMoves(Board &_board) override;
+    std::vector<Move> getAllMoves(Board *_board) override;
     char getSymbol() override;
 
     static const Coordinate MOVE_DIRECTIONS[];

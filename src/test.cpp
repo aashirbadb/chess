@@ -1,7 +1,4 @@
 #include "headers/test.h"
-#include <fstream>
-#include <assert.h>
-#include "headers/utils.h"
 
 Test::Test()
 {
@@ -51,7 +48,7 @@ int getNumberOfMoves(int depth, Board board, bool first)
 
         try
         {
-            if (isPromotion(&s, move) && move.promotion == '\0')
+            if (move.isPromotion() && move.promotion == '\0')
             {
                 // Push all possible promotions to moves and skip this turn
                 for (int i = 0; i < 4; i++)
@@ -141,7 +138,7 @@ void Test::multiplePerfts()
 
     try
     {
-        // 69 secs
+        // 69 secs -> 76 secs
         // assert(perft(6, "8/5bk1/8/2Pp4/8/1K6/8/8 w - d6 0 1", false) == 824064); // avoid illegal en passant capture
 
         // 175 secs
@@ -166,19 +163,19 @@ void Test::multiplePerfts()
         // assert(perft(5, "8/8/1P2K3/8/2n5/1q6/8/5k2 b - - 0 1", false) == 1004658); // discovered check
 
         // 31 secs
-        // assert(perft(6, "4k3/1P6/8/8/8/8/K7/8 w - - 0 1", false) == 217342); // promote to give check
+        assert(perft(6, "4k3/1P6/8/8/8/8/K7/8 w - - 0 1", false) == 217342); // promote to give check
 
         // 14 secs
-        // assert(perft(6, "8/P1k5/K7/8/8/8/8/8 w - - 0 1", false) == 92683); // underpromote to check
+        assert(perft(6, "8/P1k5/K7/8/8/8/8/8 w - - 0 1", false) == 92683); // underpromote to check
 
         // 200 ms
-        // assert(perft(6, "K1k5/8/P7/8/8/8/8/8 w - - 0 1", false) == 2217); // self stalemate
+        assert(perft(6, "K1k5/8/P7/8/8/8/8/8 w - - 0 1", false) == 2217); // self stalemate
 
         // looooong
         // assert(perft(7, "8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1", false) == 567584); // stalemate/checkmate
 
         // looooong
-        assert(perft(6, "8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1", false) == 23527); // double check
+        // assert(perft(6, "8/8/2k5/5q2/5n2/8/5K2/8 b - - 0 1", false) == 23527); // double check
     }
     catch (const Error &e)
     {

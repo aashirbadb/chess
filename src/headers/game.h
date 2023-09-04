@@ -1,15 +1,24 @@
 #pragma once
+#include <stack>
+#include <iostream>
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
-#include <stack>
+#include <SDL2/SDL_mixer.h>
+#include <SDL2/SDL_blendmode.h>
+
+class GameScene;
+class SoundManager;
+enum class Sound;
+
 #include "board.h"
 #include "piece.h"
 #include "coordinate.h"
 #include "move.h"
 #include "gameScene.h"
 #include "texture.h"
-#include <SDL2/SDL_blendmode.h>
 #include "sound.h"
+#include "gameMenu.h"
 
 #define SQUARE_SIZE 85
 #define BOARD_SIZE (SQUARE_SIZE * 8)
@@ -34,8 +43,6 @@ namespace color
     const SDL_Color PREV_MOVE_TILE = BLUE;
     const SDL_Color CAPTURE_TILE = RED;
 }
-
-class GameScene;
 
 struct WindowSize
 {

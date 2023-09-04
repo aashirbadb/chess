@@ -1,7 +1,6 @@
 
 #include "headers/piece.h"
-#include <iostream>
-#include "headers/utils.h"
+#include "headers/board.h"
 
 Piece::Piece(Coordinate _pos, bool _isWhite)
 {
@@ -49,22 +48,23 @@ bool Piece::isOwnPieceAt(Coordinate _coord, Board *_board)
     }
 }
 
-std::vector<Move> Piece::getLegalMoves(Board &_board)
+std::vector<Move> Piece::getLegalMoves(Board *_board)
 {
-
     std::vector<Move> allMoves = getAllMoves(_board);
 
     std::vector<Move> legalMoves;
 
     for (int i = 0; i < allMoves.size(); i++)
     {
-        Board nextMoveBoardPosition(_board);
+        // Cannot castle when in check
+        if ((allMoves[i].isKingSideCastle() || allMoves[i].isQueenSideCastle()) && _board->isPlayerInCheck())
+        {
+            continue;
+        }
+        Board nextMoveBoardPosition(*_board);
         nextMoveBoardPosition.moveUnchecked(allMoves[i]);
 
-        int queensc = isQueenSideCastle(&_board, allMoves[i]);
-        int kingsc = isKingSideCastle(&_board, allMoves[i]);
-
-        if (!nextMoveBoardPosition.isPlayerInCheck() && queensc != -1 && kingsc != -1)
+        if (!nextMoveBoardPosition.isPlayerInCheck())
         {
             legalMoves.push_back(allMoves[i]);
         }

@@ -15,7 +15,7 @@ char Knight::getSymbol()
     return isColorWhite ? 'N' : 'n';
 }
 
-std::vector<Move> Knight::getAllMoves(Board &_board)
+std::vector<Move> Knight::getAllMoves(Board *_board)
 {
     std::vector<Move> moves;
 
@@ -24,9 +24,13 @@ std::vector<Move> Knight::getAllMoves(Board &_board)
         Coordinate next_position = {position.x + Knight::MOVE_DIRECTIONS[i].x, position.y + Knight::MOVE_DIRECTIONS[i].y};
         if (next_position.isValidPosition())
         {
-            if ((_board.getPieceAt(next_position) == nullptr) || isOpponentPieceAt(next_position, &_board))
+            if (isOpponentPieceAt(next_position, _board))
             {
-                moves.push_back({position, next_position});
+                moves.push_back({position, next_position, MOVETYPE_CAPTURE});
+            }
+            else if ((_board->getPieceAt(next_position) == nullptr))
+            {
+                moves.push_back({position, next_position, MOVETYPE_NONE});
             }
         }
     }

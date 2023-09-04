@@ -1,21 +1,19 @@
-#include <iostream>
 #include "headers/ChessGameScene.h"
+
+#include "headers/board.h"
+#include "headers/piece.h"
+#include "headers/texture.h"
+#include "headers/stockfish.h"
+#include "headers/gameScene.h"
+#include "headers/gameMenu.h"
+#include "headers/game.h"
+#include "headers/sound.h"
 
 char ChessGame::columnlabel[9] = "abcdefgh";
 char ChessGame::rowlabel[9] = "12345678";
 char ChessGame::promotionPieces[4] = {'Q', 'R', 'B', 'N'};
 
-ChessGame::ChessGame(Game *g) : GameScene(g)
-{
-    board = new Board();
-    selected_piece = nullptr;
-    players[0] = new Human("Player 1");
-    players[1] = new Human("Player 2");
-    playing = true;
-    loadTextures();
-}
-
-ChessGame::ChessGame(Game *g, bool isWhiteHuman = true, bool isBlackHuman = true, std::string fen, int difficulty) : GameScene(g)
+ChessGame::ChessGame(Game *g, bool isWhiteHuman, bool isBlackHuman, std::string fen, int difficulty) : GameScene(g)
 {
     board = new Board(fen);
     selected_piece = nullptr;
@@ -204,7 +202,7 @@ void ChessGame::renderBoard()
     {
         Coordinate pos = selected_piece->getPosition();
         renderTile(pos, color::SELECTED_TILE);
-        std::vector<Move> moves = selected_piece->getLegalMoves(*board);
+        std::vector<Move> moves = selected_piece->getLegalMoves(board);
 
         for (int i = 0; i < moves.size(); i++)
         {
@@ -378,7 +376,7 @@ void ChessGame::handleBoardClick(Coordinate board_coord)
 
     if (selected_piece != nullptr)
     {
-        std::vector<Move> moves = selected_piece->getLegalMoves(*board);
+        std::vector<Move> moves = selected_piece->getLegalMoves(board);
 
         for (int i = 0; i < moves.size(); i++)
         {
@@ -441,6 +439,30 @@ void ChessGame::update()
 
     if (playing && state != GameState::Playing)
     {
+        switch (state)
+        {
+        case GameState::BlackResigns:
+            std::cerr << "Black Resigns" << std::endl;
+            break;
+        case GameState::WhiteResigns:
+            std::cerr << "White Resigns" << std::endl;
+            break;
+        case GameState::WhiteWins:
+            std::cerr << "White Wins" << std::endl;
+            break;
+        case GameState::BlackWins:
+            std::cerr << "Black Wins" << std::endl;
+            break;
+        case GameState::Draw:
+            std::cerr << "Draw" << std::endl;
+            break;
+        case GameState::Stalemate:
+            std::cerr << "Stalemate" << std::endl;
+            break;
+        default:
+            break;
+        };
+
         playing = false;
         switch (state)
         {
@@ -456,12 +478,10 @@ void ChessGame::update()
                 bool whiteturn = board->getIsWhiteTurn();
                 if ((whiteturn && (state == GameState::WhiteWins)) || (!whiteturn && (state == GameState::BlackWins)))
                 {
-                    std::cout << "Defeat" << std::endl;
                     game->playSound(Sound::Defeat);
                 }
                 else
                 {
-                    std::cout << "victory" << std::endl;
                     game->playSound(Sound::Victory);
                 }
             }
