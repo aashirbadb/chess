@@ -13,7 +13,16 @@ StockfishInstance::StockfishInstance()
 #endif
 
     write("uci");
-    this->readProcess("uciok", 1000);
+    std::vector<std::string> lines = this->readProcess("uciok", 1000);
+
+    // Get the id of the UCI engine
+    for (int i = 0; i < lines.size(); i++)
+    {
+        if (lines[i].substr(0, 8) == "id name ")
+        {
+            id = lines[i].substr(8);
+        }
+    }
 
     write("ucinewgame");
 
@@ -47,9 +56,9 @@ Move StockfishInstance::getBestMove(std::string fen, int tout = 1000)
 {
     write("position fen " + fen);
     // write("go depth 30");
-    write("go movetime tout");
+    write("go movetime " + std::to_string(tout));
 
-    std::vector<std::string> data = readProcess("bestmove", tout+10);
+    std::vector<std::string> data = readProcess("bestmove", tout + 10);
     if (timeout())
     {
         // stop searching if timeout was reached and return get the bestmove from there
@@ -94,6 +103,11 @@ void StockfishInstance::setLevel(int lvl)
     write("setoption name Skill Level value " + std::to_string(lvl)); // Skill Level (0-20)
 }
 
+std::string StockfishInstance::getID() const
+{
+    return id;
+}
+
 // ========= STOCKFISH =========
 
 StockfishInstance *Stockfish::STOCKFISH_INSTANCE = nullptr;
@@ -108,6 +122,7 @@ Stockfish::Stockfish(int lvl, int tout) : Player(false, "Stockfish")
     {
         STOCKFISH_INSTANCE = new StockfishInstance();
     }
+    name = STOCKFISH_INSTANCE->getID();
 }
 
 Stockfish::~Stockfish() {}

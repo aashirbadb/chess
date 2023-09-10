@@ -18,6 +18,7 @@ enum class Sound
 };
 const int TotalSounds = (int)Sound::___LAST;
 
+// returns the (relative) path of the sound asset
 const char *getSoundPath(Sound _s);
 
 class SoundManager
@@ -29,10 +30,5 @@ public:
     ~SoundManager();
 
     void init();
-    void playCaptureSound() const;
-    void playCastleSound() const;
-    void playCheckSound() const;
-    void playMoveSound() const;
-    void playPromoteSound() const;
     void play(Sound _sound);
 };

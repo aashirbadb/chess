@@ -78,6 +78,7 @@ class Game
 public:
     Game();
     ~Game();
+
     void start();
 
     SDL_Renderer *getRenderer();
@@ -93,4 +94,10 @@ public:
 
     bool getMuted();
     void setMuted(bool mt);
+
+    static const std::string BASE_PATH;
+
+protected:
+    // Initializes the game window and other things
+    void init();
 };

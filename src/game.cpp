@@ -1,13 +1,35 @@
 #include "headers/game.h"
+#include <SDL2/SDL_filesystem.h>
+
+const std::string Game::BASE_PATH = SDL_GetBasePath();
 
 Game::Game()
+{
+}
+
+Game::~Game()
+{
+    TTF_Quit();
+    Mix_Quit();
+    // clear the scenes stack
+    while (!scenes.empty())
+    {
+        scenes.top()->~GameScene();
+        scenes.pop();
+    }
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
+}
+
+void Game::init()
 {
     srand(time(0));
     quit = false;
 
     SDL_Init(SDL_INIT_AUDIO | SDL_INIT_EVENTS);
 
-    // window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     window = SDL_CreateWindow("Chess", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_RESIZABLE);
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
@@ -28,28 +50,12 @@ Game::Game()
     scenes.push(new GameMenu(this));
 }
 
-Game::~Game()
-{
-    TTF_Quit();
-    Mix_Quit();
-    // clear the scenes stack
-    while (!scenes.empty())
-    {
-        scenes.top()->~GameScene();
-        scenes.pop();
-    }
-
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
-}
-
 void Game::start()
 {
-    Uint64 timeperframe = 1000 / FPS;
+    init();
     while (!quit)
     {
-        Uint64 start = SDL_GetTicks64();
+        // Uint64 start = SDL_GetTicks64();
 
         // Handle all queued events before moving on
         // Fixes input issues when two engines are playing
@@ -88,9 +94,9 @@ void Game::start()
         SDL_RenderPresent(renderer);
 
         scenes.top()->update();
-        Uint64 end = SDL_GetTicks64();
 
-        float elapsedMS = (end - start);
+        // Uint64 end = SDL_GetTicks64();
+        // float elapsedMS = (end - start);
 
         // Cap to 60 FPS
         // SDL_Delay(std::max((long int)(1000 / FPS - elapsedMS), (long int)0));

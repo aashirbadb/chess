@@ -5,6 +5,7 @@
 
 class Player
 {
+protected:
     bool human;
     std::string name;
 

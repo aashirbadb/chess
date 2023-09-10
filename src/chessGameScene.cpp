@@ -564,10 +564,11 @@ void ChessGame::loadTextures()
     const char pieceSymbol[] = "BKNPQRbknpqr";
     for (int i = 0; pieceSymbol[i]; i++)
     {
-
-        pieceTextures[pieceSymbol[i]].setRenderer(renderer);
-
-        pieceTextures[(pieceSymbol[i])].loadImage(piecefilepath[i]);
+        if (pieceTextures[i].getTexture() == nullptr)
+        {
+            pieceTextures[pieceSymbol[i]].setRenderer(renderer);
+            pieceTextures[(pieceSymbol[i])].loadImage((Game::BASE_PATH + "../" + piecefilepath[i]).c_str());
+        }
     }
 
     for (int i = 0; i < 8; i++)

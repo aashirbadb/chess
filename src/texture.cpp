@@ -1,4 +1,5 @@
 #include "headers/texture.h"
+#include "headers/game.h"
 
 FontMap Texture::FONTS;
 
@@ -31,8 +32,7 @@ TTF_Font *Texture::getFont(int fontsize)
 
     if (font == nullptr)
     {
-        // std::cerr << "Font of size " << fontsize << " not found. Creating new one." << std::endl;
-        font = TTF_OpenFont("assets/Roboto.ttf", fontsize);
+        font = TTF_OpenFont((Game::BASE_PATH+"../assets/Roboto.ttf").c_str(), fontsize);
         FONTS[fontsize] = font;
     }
     return font;
@@ -122,7 +122,7 @@ void Texture::loadImage(std::string path)
 
 void Texture::loadImage(std::string path, SDL_Rect size)
 {
-    texture = IMG_LoadTexture(renderer, path.c_str());
+    texture = IMG_LoadTexture(renderer, (path).c_str());
     if (texture == nullptr)
     {
         std::cerr << "Error loading " << path << ": " << IMG_GetError() << std::endl;

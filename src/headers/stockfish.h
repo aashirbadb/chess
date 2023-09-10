@@ -10,6 +10,8 @@
 
 class StockfishInstance : private Communication::Process
 {
+    std::string id;
+
 public:
     StockfishInstance();
     ~StockfishInstance() override;
@@ -18,6 +20,7 @@ public:
     bool isReady();
     void setOption(std::string option, std::string value);
     void setLevel(int lvl);
+    std::string getID() const;
 
 protected:
     void write(std::string str);
@@ -30,7 +33,7 @@ class Stockfish : public Player
     static StockfishInstance *STOCKFISH_INSTANCE;
 
 public:
-    Stockfish(int lvl = 10, int tout = 20);
+    Stockfish(int lvl = 10, int tout = 200);
     ~Stockfish();
 
     Move getMove(Board *board) override;

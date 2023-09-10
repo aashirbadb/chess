@@ -1,4 +1,5 @@
 #include "headers/sound.h"
+#include "headers/game.h"
 
 std::unordered_map<Sound, Mix_Chunk *> SoundManager::SOUNDS;
 
@@ -39,7 +40,8 @@ void SoundManager::init()
     {
         Sound snd = (Sound)i;
         const char *path = getSoundPath(snd);
-        Mix_Chunk *chunk = Mix_LoadWAV(path);
+        std::string abspath = Game::BASE_PATH + "../" + getSoundPath(snd);
+        Mix_Chunk *chunk = Mix_LoadWAV(abspath.c_str());
         if (chunk == nullptr)
         {
             std::cerr << "Error loading " << path << ": " << Mix_GetError() << std::endl;
