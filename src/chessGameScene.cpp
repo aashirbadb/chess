@@ -255,17 +255,26 @@ void ChessGame::renderBoard()
         fileTexture[i]->draw(NULL, &filerect);
         rankTexture[i]->draw(NULL, &rankrect);
     }
-
     // Draw pieces
     for (int y = 0; y < 8; y++)
     {
         for (int x = 0; x < 8; x++)
         {
-            if (board->getPieceAt({x, y}) != nullptr)
+            // Renders all the pieces except selected piece when it is dragged
+            if (board->getPieceAt({x, y}) != nullptr && !(isSelectedPieceDrag && selected_piece == board->getPieceAt({x, y})))
             {
                 renderPiece(board->getPieceAt({x, y}));
             }
         }
+    }
+
+    // Show selected piece when it is being dragged
+    if (isSelectedPieceDrag && selected_piece != nullptr)
+    {
+        int mouse_x, mouse_y;
+        SDL_GetMouseState(&mouse_x, &mouse_y);
+        SDL_Rect rect = {mouse_x - wsize.tileSize / 2, mouse_y - wsize.tileSize / 2, wsize.tileSize, wsize.tileSize};
+        pieceTextures[selected_piece->getSymbol()].drawCentered(rect);
     }
 }
 
@@ -333,7 +342,7 @@ void ChessGame::handlePromotion(int x, int y)
             wsize.tileSize,
             wsize.tileSize,
         };
-        if (hasClickedInsideButton(x, y, rect))
+        if (isInsideRect(x, y, rect))
         {
             board->promoteTo(whitePromotion ? toupper(promotionPieces[i]) : tolower(promotionPieces[i]));
             game->playSound(Sound::Promote);
@@ -344,6 +353,7 @@ void ChessGame::handlePromotion(int x, int y)
 
 void ChessGame::handleBoardClick(Coordinate board_coord)
 {
+    clickStart = SDL_GetTicks64();
     if (!getCurrentPlayer()->isHuman())
         return;
 
@@ -400,6 +410,7 @@ void ChessGame::playSound(Move mv)
 
 void ChessGame::update()
 {
+    isSelectedPieceDrag = clickStart != 0 && (SDL_GetTicks64() - clickStart) > 100;
     state = board->getGameState();
 
     if (playing && state != GameState::Playing)
@@ -587,28 +598,66 @@ void ChessGame::handleLeftMouse(SDL_Event &e)
     {
         handlePromotion(x, y);
     }
-    else if (playing && currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
+    else if (playing && currentPlayer->isHuman() && isInsideRect(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
     {
         // If player has clicked inside the board
         Coordinate board_coord{(x - wsize.leftOffset) / wsize.tileSize, (y - wsize.topOffset) / wsize.tileSize};
         handleBoardClick(board_coord);
     }
 
-    if (hasClickedInsideButton(x, y, quitButtonRect))
+    if (isInsideRect(x, y, quitButtonRect))
     {
         game->playSound(Sound::ButtonClick);
         game->pushScene(new GameMenu(game));
     }
-    else if (hasClickedInsideButton(x, y, resignButtonRect) && currentPlayer->isHuman())
+    else if (isInsideRect(x, y, resignButtonRect) && currentPlayer->isHuman())
     {
         board->resign();
     }
-    else if (hasClickedInsideButton(x, y, replayButtonRect))
+    else if (isInsideRect(x, y, replayButtonRect))
     {
         bool p1 = players[0]->isHuman();
         bool p2 = players[0]->isHuman();
 
         game->playSound(Sound::ButtonClick);
         game->pushScene(new ChessGame(game, players[1]->isHuman(), players[0]->isHuman()));
+    }
+}
+
+void ChessGame::handleEvent(SDL_Event &e)
+{
+    WindowSize wsize = game->getWindowSize();
+
+    // Drop selected piece
+    if (e.type == SDL_MOUSEBUTTONUP)
+    {
+        clickStart = 0;
+        int mouse_x, mouse_y;
+        SDL_GetMouseState(&mouse_x, &mouse_y);
+
+        if (isSelectedPieceDrag && selected_piece != nullptr && isInsideRect(mouse_x, mouse_y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
+        {
+            Coordinate board_coord{(mouse_x - wsize.leftOffset) / wsize.tileSize, (mouse_y - wsize.topOffset) / wsize.tileSize};
+            std::vector<Move> moves = selected_piece->getLegalMoves(board);
+            bool valid_move = false;
+            Move move;
+            for (int i = 0; i < moves.size(); i++)
+            {
+                if (moves[i].end == board_coord)
+                {
+                    valid_move = true;
+                    move = moves[i];
+                    break;
+                }
+            }
+
+            if (valid_move)
+            {
+                board->performMove(move);
+                playSound(move);
+            }
+        }
+
+        selected_piece = nullptr;
     }
 }

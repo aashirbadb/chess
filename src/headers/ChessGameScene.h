@@ -39,11 +39,15 @@ class ChessGame : public GameScene
     SDL_Rect resignButtonRect;
     SDL_Rect replayButtonRect;
 
+    bool isSelectedPieceDrag;
+    Uint64 clickStart;
+
 public:
     ChessGame(Game *g, bool isWhiteHuman = true, bool isBlackHuman = true, std::string fen = STARTING_FEN, int difficulty = 10);
 
     ~ChessGame() override;
     void render() override;
+    void handleEvent(SDL_Event &e) override;
     void handleLeftMouse(SDL_Event &e) override;
     void update() override;
     void handleResize() override;

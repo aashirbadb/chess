@@ -21,7 +21,7 @@ public:
     virtual void update() = 0;
     virtual void handleResize() {}
 
-    static inline bool hasClickedInsideButton(int x, int y, SDL_Rect rect)
+    static inline bool isInsideRect(int x, int y, SDL_Rect rect)
     {
         return (x > rect.x && x < rect.x + rect.w) && (y > rect.y && y < rect.y + rect.h);
     }
