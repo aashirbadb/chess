@@ -143,4 +143,6 @@ Move Stockfish::getMove(Board *board)
             std::cerr << e.what() << '\n';
         }
     }
+
+    throw Error("Cannot get move");
 }

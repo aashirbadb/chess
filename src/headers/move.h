@@ -88,6 +88,11 @@ struct Move
         return movetype & MOVETYPE_QUEENSIDE_CASTLE;
     }
 
+    inline bool isCastle()
+    {
+        return isQueenSideCastle() || isKingSideCastle();
+    }
+
     inline bool isPawnTwoMovesAhead()
     {
         return movetype & MOVETYPE_PAWN_TWOMOVES;
@@ -98,7 +103,8 @@ struct Move
         return movetype & MOVETYPE_ENPASSANT;
     }
 
-    inline bool isUnknown(){
+    inline bool isUnknown()
+    {
         return movetype & MOVETYPE_UNKNOWN;
     }
 

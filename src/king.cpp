@@ -87,12 +87,12 @@ bool King::isInCheck(Board *_board)
 {
     // Check for pawns
     Coordinate pawn1 = {position.x + 1, position.y + (isColorWhite ? -1 : 1)};
-    if (pawn1.isValidPosition() && isOpponentPieceAt(pawn1, _board) && tolower(_board->getPieceAt(pawn1)->getSymbol()) == 'p')
+    if (pawn1.isValidPosition() && isOpponentPieceAt(pawn1, _board) && _board->getPieceAt(pawn1)->isPawn())
     {
         return true;
     }
     Coordinate pawn2 = {position.x - 1, position.y + (isColorWhite ? -1 : 1)};
-    if (pawn2.isValidPosition() && isOpponentPieceAt(pawn2, _board) && tolower(_board->getPieceAt(pawn2)->getSymbol()) == 'p')
+    if (pawn2.isValidPosition() && isOpponentPieceAt(pawn2, _board) && _board->getPieceAt(pawn2)->isPawn())
     {
         return true;
     }
@@ -101,7 +101,7 @@ bool King::isInCheck(Board *_board)
     for (int i = 0; i < 8; i++)
     {
         Coordinate next_position = {position.x + Knight::MOVE_DIRECTIONS[i].x, position.y + Knight::MOVE_DIRECTIONS[i].y};
-        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && tolower(_board->getPieceAt(next_position)->getSymbol()) == 'n')
+        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && _board->getPieceAt(next_position)->isKnight())
         {
             return true;
         }
@@ -111,7 +111,7 @@ bool King::isInCheck(Board *_board)
     for (int i = 0; i < 8; i++)
     {
         Coordinate next_position = {position.x + King::MOVE_DIRECTIONS[i].x, position.y + King::MOVE_DIRECTIONS[i].y};
-        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && tolower(_board->getPieceAt(next_position)->getSymbol()) == 'k')
+        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && _board->getPieceAt(next_position)->isKing())
         {
             return true;
         }
@@ -171,12 +171,12 @@ std::set<Coordinate> King::getCheckCoordinates(Board *_board)
     std::set<Coordinate> coordinates;
     // Check for pawns
     Coordinate pawn1 = {position.x + 1, position.y + (isColorWhite ? -1 : 1)};
-    if (pawn1.isValidPosition() && isOpponentPieceAt(pawn1, _board) && tolower(_board->getPieceAt(pawn1)->getSymbol()) == 'p')
+    if (pawn1.isValidPosition() && isOpponentPieceAt(pawn1, _board) && _board->getPieceAt(pawn1)->isPawn())
     {
         coordinates.insert(pawn1);
     }
     Coordinate pawn2 = {position.x - 1, position.y + (isColorWhite ? -1 : 1)};
-    if (pawn2.isValidPosition() && isOpponentPieceAt(pawn2, _board) && tolower(_board->getPieceAt(pawn2)->getSymbol()) == 'p')
+    if (pawn2.isValidPosition() && isOpponentPieceAt(pawn2, _board) && _board->getPieceAt(pawn2)->isPawn())
     {
         coordinates.insert(pawn2);
     }
@@ -185,7 +185,7 @@ std::set<Coordinate> King::getCheckCoordinates(Board *_board)
     for (int i = 0; i < 8; i++)
     {
         Coordinate next_position = {position.x + Knight::MOVE_DIRECTIONS[i].x, position.y + Knight::MOVE_DIRECTIONS[i].y};
-        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && tolower(_board->getPieceAt(next_position)->getSymbol()) == 'n')
+        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && _board->getPieceAt(next_position)->isKnight())
         {
             coordinates.insert(next_position);
         }
@@ -195,7 +195,7 @@ std::set<Coordinate> King::getCheckCoordinates(Board *_board)
     for (int i = 0; i < 8; i++)
     {
         Coordinate next_position = {position.x + King::MOVE_DIRECTIONS[i].x, position.y + King::MOVE_DIRECTIONS[i].y};
-        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && tolower(_board->getPieceAt(next_position)->getSymbol()) == 'k')
+        if (next_position.isValidPosition() && isOpponentPieceAt(next_position, _board) && _board->getPieceAt(next_position)->isKing())
         {
             coordinates.insert(next_position);
         }

@@ -12,7 +12,11 @@ protected:
 public:
     GameScene(Game *g) : game(g) {}
     virtual ~GameScene() {}
-    virtual void handleEvent(SDL_Event &e) = 0;
+    virtual void handleEvent(SDL_Event &e) {}
+    virtual void handleRightMouse(SDL_Event &e) {}
+    virtual void handleLeftMouse(SDL_Event &e) {}
+    virtual void handleKeyPress(SDL_Event &e) {}
+
     virtual void render() = 0;
     virtual void update() = 0;
     virtual void handleResize() {}

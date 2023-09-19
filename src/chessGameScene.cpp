@@ -180,8 +180,16 @@ void ChessGame::renderBoard()
     if (prevmoves.size() > 0)
     {
         Move prevmv = prevmoves.back();
-        renderTile({prevmv.start.x, prevmv.start.y}, color::PREV_MOVE_TILE);
-        renderTile({prevmv.end.x, prevmv.end.y}, color::PREV_MOVE_TILE);
+        if (prevmv.isCastle())
+        {
+            renderTile({prevmv.start.x, prevmv.end.y}, color::PREV_MOVE_TILE);
+            renderTile({prevmv.isKingSideCastle() ? 6 : 2, prevmv.end.y}, color::PREV_MOVE_TILE); // Highlight king's current position
+        }
+        else
+        {
+            renderTile({prevmv.start.x, prevmv.start.y}, color::PREV_MOVE_TILE);
+            renderTile({prevmv.end.x, prevmv.end.y}, color::PREV_MOVE_TILE);
+        }
     }
 
     // Highlight if there is check
@@ -206,14 +214,24 @@ void ChessGame::renderBoard()
 
         for (int i = 0; i < moves.size(); i++)
         {
+            Move move = moves[i];
             int r = wsize.tileSize / 5;
             int x = wsize.leftOffset + wsize.tileSize * moves[i].end.x + wsize.tileSize / 2;
             int y = wsize.topOffset + wsize.tileSize * moves[i].end.y + wsize.tileSize / 2;
 
-            if (board->getPieceAt(moves[i].end) == nullptr)
-                Texture::drawCircle(game->getRenderer(), x, y, r, color::GREEN);
-            else
+            if (move.isCapture())
                 renderTile(moves[i].end, color::CAPTURE_TILE);
+            else if (move.isCastle())
+            {
+                // Show green dot if movetype is castle and tile is empty
+                // If there is the end coordinate has rook then show change color to movetile
+                if (board->getPieceAt(moves[i].end) == nullptr)
+                    Texture::drawCircle(game->getRenderer(), x, y, r, color::GREEN);
+                else
+                    renderTile(moves[i].end, color::MOVE_TILE);
+            }
+            else
+                Texture::drawCircle(game->getRenderer(), x, y, r, color::GREEN);
         }
     }
 
@@ -286,48 +304,6 @@ void ChessGame::renderPromotionMenu()
     // SDL_RenderFillRect(game->getRenderer(), &boarderrect);
 }
 
-void ChessGame::handleEvent(SDL_Event &e)
-{
-    WindowSize wsize = game->getWindowSize();
-
-    Player *currentPlayer = getCurrentPlayer();
-
-    if (e.type == SDL_MOUSEBUTTONDOWN)
-    {
-        int x, y;
-        SDL_GetMouseState(&x, &y);
-
-        if (playing && currentPlayer->isHuman() && board->isWaitingForPromotion())
-        {
-            handlePromotion(x, y);
-        }
-        else if (playing && currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
-        {
-            // If player has clicked inside the board
-            Coordinate board_coord{(x - wsize.leftOffset) / wsize.tileSize, (y - wsize.topOffset) / wsize.tileSize};
-            handleBoardClick(board_coord);
-        }
-
-        if (hasClickedInsideButton(x, y, quitButtonRect))
-        {
-            game->playSound(Sound::ButtonClick);
-            game->pushScene(new GameMenu(game));
-        }
-        else if (hasClickedInsideButton(x, y, resignButtonRect) && currentPlayer->isHuman())
-        {
-            board->resign();
-        }
-        else if (hasClickedInsideButton(x, y, replayButtonRect))
-        {
-            bool p1 = players[0]->isHuman();
-            bool p2 = players[0]->isHuman();
-
-            game->playSound(Sound::ButtonClick);
-            game->pushScene(new ChessGame(game, players[1]->isHuman(), players[0]->isHuman()));
-        }
-    }
-}
-
 void ChessGame::renderTile(Coordinate coord, SDL_Color color)
 {
     WindowSize wsize = game->getWindowSize();
@@ -382,10 +358,10 @@ void ChessGame::handleBoardClick(Coordinate board_coord)
         {
             if (moves[i].end == board_coord)
             {
-                MoveType mvtype = board->performMove(moves[i]);
+                board->performMove(moves[i]);
                 selected_piece = nullptr;
 
-                playSound(mvtype);
+                playSound(moves[i]);
                 return;
             }
         }
@@ -404,27 +380,16 @@ void ChessGame::handleBoardClick(Coordinate board_coord)
     }
 }
 
-void ChessGame::playSound(MoveType mvtype)
+void ChessGame::playSound(Move mv)
 {
-    switch (mvtype)
-    {
-    case MoveType::Enpassant:
-    case MoveType::Normal:
-        game->playSound(Sound::Move);
-        break;
-    case MoveType::Promotion:
-        game->playSound(Sound::Promote);
-        break;
-    case MoveType::Capture:
+    if (mv.isCapture())
         game->playSound(Sound::Capture);
-        break;
-    case MoveType::Castle:
+    else if (mv.isPromotion())
+        game->playSound(Sound::Promote);
+    else if (mv.isCastle())
         game->playSound(Sound::Castle);
-        break;
-
-    default:
-        break;
-    }
+    else
+        game->playSound(Sound::Move);
 
     if (board->isWhiteInCheck() || board->isBlackInCheck())
     {
@@ -503,8 +468,8 @@ void ChessGame::update()
     {
         Move mv = currentplayer->getMove(board);
 
-        MoveType mvtype = board->performMove(mv);
-        playSound(mvtype);
+        board->performMove(mv);
+        playSound(mv);
     }
 }
 
@@ -606,5 +571,44 @@ void ChessGame::loadTextures()
     {
         stateTextures[states[i]].setRenderer(renderer);
         stateTextures[states[i]].loadString(stateString[i], 24, color::BLACK);
+    }
+}
+
+void ChessGame::handleLeftMouse(SDL_Event &e)
+{
+    WindowSize wsize = game->getWindowSize();
+
+    Player *currentPlayer = getCurrentPlayer();
+
+    int x, y;
+    SDL_GetMouseState(&x, &y);
+
+    if (playing && currentPlayer->isHuman() && board->isWaitingForPromotion())
+    {
+        handlePromotion(x, y);
+    }
+    else if (playing && currentPlayer->isHuman() && hasClickedInsideButton(x, y, {wsize.leftOffset, wsize.topOffset, wsize.boardSize, wsize.boardSize}))
+    {
+        // If player has clicked inside the board
+        Coordinate board_coord{(x - wsize.leftOffset) / wsize.tileSize, (y - wsize.topOffset) / wsize.tileSize};
+        handleBoardClick(board_coord);
+    }
+
+    if (hasClickedInsideButton(x, y, quitButtonRect))
+    {
+        game->playSound(Sound::ButtonClick);
+        game->pushScene(new GameMenu(game));
+    }
+    else if (hasClickedInsideButton(x, y, resignButtonRect) && currentPlayer->isHuman())
+    {
+        board->resign();
+    }
+    else if (hasClickedInsideButton(x, y, replayButtonRect))
+    {
+        bool p1 = players[0]->isHuman();
+        bool p2 = players[0]->isHuman();
+
+        game->playSound(Sound::ButtonClick);
+        game->pushScene(new ChessGame(game, players[1]->isHuman(), players[0]->isHuman()));
     }
 }

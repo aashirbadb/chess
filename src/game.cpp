@@ -60,29 +60,7 @@ void Game::start()
         // Handle all queued events before moving on
         // Fixes input issues when two engines are playing
         while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-            case SDL_QUIT:
-                quit = true;
-                break;
-
-            case SDL_WINDOWEVENT:
-                calculateWindowSize();
-                scenes.top()->handleResize();
-                break;
-
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEMOTION:
-            case SDL_MOUSEBUTTONUP:
-            case SDL_MOUSEWHEEL:
-                scenes.top()->handleEvent(event);
-                break;
-
-            default:
-                break;
-            }
-        }
+            handleEvents(event);
 
         // No need to render if user has quit
         if (quit)
@@ -100,6 +78,39 @@ void Game::start()
 
         // Cap to 60 FPS
         // SDL_Delay(std::max((long int)(1000 / FPS - elapsedMS), (long int)0));
+    }
+}
+
+void Game::handleEvents(SDL_Event &e)
+{
+    switch (event.type)
+    {
+    case SDL_QUIT:
+        quit = true;
+        break;
+
+    case SDL_WINDOWEVENT:
+        calculateWindowSize();
+        scenes.top()->handleResize();
+        break;
+
+    case SDL_MOUSEBUTTONDOWN:
+        switch (event.button.button)
+        {
+        case SDL_BUTTON_LEFT:
+            scenes.top()->handleLeftMouse(event);
+            break;
+        case SDL_BUTTON_RIGHT:
+            scenes.top()->handleRightMouse(event);
+            break;
+        default:
+            scenes.top()->handleEvent(event);
+            break;
+        }
+        break;
+    default:
+        scenes.top()->handleEvent(event);
+        break;
     }
 }
 

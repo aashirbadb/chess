@@ -30,15 +30,6 @@ enum class GameState
     Draw
 };
 
-enum class MoveType
-{
-    Normal,
-    Castle,
-    Capture,
-    Enpassant,
-    Promotion
-};
-
 class Board
 {
 private:
@@ -85,7 +76,9 @@ public:
     bool isOpponentInCheck();
     bool isPlayerInCheck();
 
+    // Returns player's **every** pseudo legal moves
     std::vector<Move> getAllPlayerMoves(bool);
+    // Returns player's **every** legal moves
     std::vector<Move> getAllPlayerLegalMoves(bool);
 
     bool castlingAvailable(char _type);
@@ -94,7 +87,7 @@ public:
     Coordinate getEnpassantTarget();
 
     void moveUnchecked(Move _move);
-    MoveType performMove(Move _move);
+    void performMove(Move _move);
     void setPlayerTurn(bool _turn);
 
     Piece *createPiece(Coordinate _coord, char type);

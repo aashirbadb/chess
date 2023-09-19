@@ -17,9 +17,6 @@ public:
     Piece(Coordinate _pos, bool _isWhite);
     ~Piece();
 
-    Coordinate getPosition();
-    bool isWhite();
-
     // Get all moves, including invalid(cannot move due to check, blocking pieces) ones
     virtual std::vector<Move> getAllMoves(Board *_board) = 0;
 
@@ -34,5 +31,14 @@ public:
 
     std::vector<Move> getLegalMoves(Board *_board);
 
-    void updateCoordinate(Coordinate _position);
+    inline Coordinate getPosition() { return position; }
+    inline bool isWhite() { return isColorWhite; }
+    inline void updateCoordinate(Coordinate _position) { position = _position; }
+
+    inline bool isKing() { return getSymbol() == 'K' || getSymbol() == 'k'; }
+    inline bool isQueen() { return getSymbol() == 'Q' || getSymbol() == 'q'; }
+    inline bool isRook() { return getSymbol() == 'R' || getSymbol() == 'r'; }
+    inline bool isBishop() { return getSymbol() == 'B' || getSymbol() == 'b'; }
+    inline bool isKnight() { return getSymbol() == 'N' || getSymbol() == 'n'; }
+    inline bool isPawn() { return getSymbol() == 'P' || getSymbol() == 'p'; }
 };

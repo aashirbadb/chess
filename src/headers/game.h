@@ -100,4 +100,6 @@ public:
 protected:
     // Initializes the game window and other things
     void init();
+
+    void handleEvents(SDL_Event &e);
 };

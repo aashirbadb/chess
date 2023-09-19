@@ -446,7 +446,7 @@ void Board::moveUnchecked(Move _move)
   }
 }
 
-MoveType Board::performMove(Move _move)
+void Board::performMove(Move _move)
 {
   // If movetype is unknown(user input or stockfish results, then calculate it)
   if (_move.isUnknown())
@@ -462,7 +462,6 @@ MoveType Board::performMove(Move _move)
 
   Piece *startPiece = getPieceAt(_move.start);
   Piece *endPiece = getPieceAt(_move.end);
-  Piece *capturePiece = endPiece;
   // check if there is a piece to move
   if (startPiece == nullptr)
     throw Error(ErrorCode::NoStartPiece);
@@ -486,8 +485,6 @@ MoveType Board::performMove(Move _move)
 
   if (!isValidMove)
     throw Error(ErrorCode::InvalidMove, this->toFEN() + "\nMove: " + std::string(_move));
-
-  MoveType mvType = MoveType::Normal;
 
   // Move the pieces
   if (_move.isKingSideCastle() || _move.isQueenSideCastle())
@@ -526,22 +523,19 @@ MoveType Board::performMove(Move _move)
     int offset = isWhiteTurn ? 0 : 2;
     canCastle[offset] = false;
     canCastle[offset + 1] = false;
-    mvType = MoveType::Castle;
   }
   else if (_move.isEnpassant())
   {
     int direction = isWhiteTurn ? 1 : -1;
     Coordinate captureCoord = {_move.end.x, _move.start.y};
 
-    capturePiece = getPieceAt(captureCoord); // Special case
+    capturedPieces.push_back(getPieceAt(captureCoord));
 
     getPieceAt(_move.start) = nullptr;  // remove startpiece
     getPieceAt(captureCoord) = nullptr; // capture opponent piece
 
     getPieceAt(_move.end) = startPiece;
     getPieceAt(_move.end)->updateCoordinate(_move.end);
-
-    mvType = MoveType::Enpassant;
   }
   else if (_move.isPromotion()) // Handles promotion
   {
@@ -555,7 +549,6 @@ MoveType Board::performMove(Move _move)
     {
       promoteTo(_move.promotion, false);
     }
-    mvType = MoveType::Promotion;
   }
   else // Handles other moves
   {
@@ -564,14 +557,7 @@ MoveType Board::performMove(Move _move)
     getPieceAt(_move.end)->updateCoordinate(_move.end);
 
     if (_move.isCapture())
-    {
-      mvType = MoveType::Capture;
-    }
-  }
-
-  if (capturePiece != nullptr)
-  {
-    capturedPieces.push_back(capturePiece);
+      capturedPieces.push_back(endPiece);
   }
 
   // Set enpassant target if pawn has moved two moves ahead
@@ -592,7 +578,7 @@ MoveType Board::performMove(Move _move)
 
   // Halfmove clock increments every piece but resets when there is pawn movement or capture
   // Otherwise increment it by one
-  if (tolower(startPiece->getSymbol()) == 'p' || _move.isCapture())
+  if (startPiece->isPawn() || _move.isCapture())
     halfMoveClock = 0;
   else
     halfMoveClock++;
@@ -649,8 +635,6 @@ MoveType Board::performMove(Move _move)
   }
 
   previousMoves.push_back(_move);
-
-  return mvType;
 }
 
 // Helper function to create a piece at given coordinate
@@ -913,7 +897,7 @@ int Board::getMovetype(Move _move)
   }
 
   // Kingside castle
-  if (tolower(startPiece->getSymbol()) == 'k' &&
+  if (startPiece->isKing() &&
       _move.start.x == 4 &&
       (_move.end.x == 6 || _move.end.x == 7) &&
       !this->isPlayerInCheck())
@@ -938,7 +922,7 @@ int Board::getMovetype(Move _move)
   }
 
   // Queenside castle
-  if (tolower(startPiece->getSymbol()) == 'k' &&
+  if (startPiece->isKing() &&
       _move.start.x == 4 &&
       (_move.end.x == 0 || _move.end.x == 2) &&
       !this->isPlayerInCheck())
@@ -964,14 +948,14 @@ int Board::getMovetype(Move _move)
 
   // Pawn two moves
   if (((startPiece != nullptr) &&
-       (tolower(startPiece->getSymbol()) == 'p') &&
+       startPiece->isPawn() &&
        (abs(_move.end.y - _move.start.y) == 2)))
   {
     mvtype |= MOVETYPE_PAWN_TWOMOVES;
   }
 
   // En passant
-  if ((tolower(startPiece->getSymbol()) == 'p' && _move.end == this->getEnpassantTarget()))
+  if ((startPiece->isPawn() && _move.end == this->getEnpassantTarget()))
   {
     mvtype |= MOVETYPE_ENPASSANT;
   }

@@ -12,15 +12,6 @@ Piece::~Piece()
 {
 }
 
-Coordinate Piece::getPosition()
-{
-    return position;
-}
-
-bool Piece::isWhite()
-{
-    return isColorWhite;
-}
 
 bool Piece::isOpponentPieceAt(Coordinate _coord, Board *_board)
 {
@@ -71,9 +62,4 @@ std::vector<Move> Piece::getLegalMoves(Board *_board)
     }
 
     return legalMoves;
-}
-
-void Piece::updateCoordinate(Coordinate _new_pos)
-{
-    position = _new_pos;
 }

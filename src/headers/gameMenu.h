@@ -23,7 +23,7 @@ public:
     ~GameMenu();
 
     void render() override;
-    void handleEvent(SDL_Event &e) override;
+    void handleLeftMouse(SDL_Event &e) override;
     void update() override;
     void handleResize() override;
 

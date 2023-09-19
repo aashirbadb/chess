@@ -44,7 +44,7 @@ public:
 
     ~ChessGame() override;
     void render() override;
-    void handleEvent(SDL_Event &e) override;
+    void handleLeftMouse(SDL_Event &e) override;
     void update() override;
     void handleResize() override;
 
@@ -56,7 +56,7 @@ private:
     void handlePromotion(int x, int y);
     void handleBoardClick(Coordinate);
 
-    void playSound(MoveType _type);
+    void playSound(Move _move);
     void loadTextures();
 
     Player *getCurrentPlayer();

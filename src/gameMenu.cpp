@@ -58,29 +58,26 @@ void GameMenu::render()
     }
 }
 
-void GameMenu::handleEvent(SDL_Event &e)
+void GameMenu::handleLeftMouse(SDL_Event &e)
 {
-    if (e.type == SDL_MOUSEBUTTONDOWN)
-    {
-        int x, y;
-        SDL_GetMouseState(&x, &y);
+    int x, y;
+    SDL_GetMouseState(&x, &y);
 
-        if (hasClickedInsideButton(x, y, singleplayerbutton))
-        {
-            bool whitehuman = rand() % 2 == 0;
-            game->pushScene(new ChessGame(game, whitehuman, !whitehuman));
-            game->playSound(Sound::ButtonClick);
-        }
-        else if (hasClickedInsideButton(x, y, multiplayerbutton))
-        {
-            game->pushScene(new ChessGame(game, true, true));
-            game->playSound(Sound::ButtonClick);
-        }
-        else if (hasClickedInsideButton(x, y, muteButton))
-        {
-            game->setMuted(!game->getMuted());
-            game->playSound(Sound::ButtonClick);
-        }
+    if (hasClickedInsideButton(x, y, singleplayerbutton))
+    {
+        bool whitehuman = rand() % 2 == 0;
+        game->pushScene(new ChessGame(game, whitehuman, !whitehuman));
+        game->playSound(Sound::ButtonClick);
+    }
+    else if (hasClickedInsideButton(x, y, multiplayerbutton))
+    {
+        game->pushScene(new ChessGame(game, true, true));
+        game->playSound(Sound::ButtonClick);
+    }
+    else if (hasClickedInsideButton(x, y, muteButton))
+    {
+        game->setMuted(!game->getMuted());
+        game->playSound(Sound::ButtonClick);
     }
 }
 
